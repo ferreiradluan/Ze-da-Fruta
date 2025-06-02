@@ -6,7 +6,11 @@ export class StripeService {
   private stripe: Stripe;
 
   constructor() {
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+    const apiKey = process.env.STRIPE_API_KEY || process.env.STRIPE_SECRET_KEY;
+    if (!apiKey) {
+      throw new Error('Stripe API key is not set. Defina STRIPE_API_KEY nas variáveis de ambiente.');
+    }
+    this.stripe = new Stripe(apiKey, {
       apiVersion: '2025-05-28.basil', // Corrigido para a versão esperada pelo pacote stripe
     });
   }
