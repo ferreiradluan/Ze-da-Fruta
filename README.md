@@ -1,82 +1,82 @@
-# NestJS CRUD Application
+# Ze da Fruta - Backend
 
-A RESTful API built with NestJS, featuring CRUD operations, authentication, and Google OAuth integration.
+Este é o backend do aplicativo de delivery de hortifrúti chamado **Ze da Fruta**. O sistema foi desenvolvido em NestJS e fornece uma API RESTful para operações de cadastro, autenticação, pedidos, entregas e gerenciamento de produtos, usuários e estabelecimentos.
 
-## 🚀 Getting Started
+## 🚀 Primeiros Passos
 
-### Prerequisites
+### Pré-requisitos
 
-- Docker and Docker Compose
-- Node.js 20.x (for local development)
-- npm or yarn
+- Docker e Docker Compose
+- Node.js 20.x (para desenvolvimento local)
+- npm ou yarn
 
-### Environment Setup
+### Configuração do Ambiente
 
-1. Clone the repository:
+1. Clone o repositório:
 ```bash
-git clone <your-repository-url>
+git clone <url-do-seu-repositorio>
 cd nestjs-crud-app-2
 ```
 
-2. Create your environment file:
+2. Crie o arquivo de variáveis de ambiente:
 ```bash
 cp .env.example .env
 ```
 
-3. Update the `.env` file with your actual values:
-- Generate a secure JWT_SECRET
-- Set up Google OAuth credentials in Google Cloud Console
-- Update other environment variables as needed
+3. Atualize o arquivo `.env` com seus dados:
+- Gere um JWT_SECRET seguro
+- Configure as credenciais do Google OAuth no Google Cloud Console
+- Atualize as demais variáveis conforme necessário
 
-### Running with Docker
+### Executando com Docker
 
-1. Build and start the container:
+1. Construa e inicie o container:
 ```bash
 docker-compose up --build
 ```
 
-The application will be available at `http://localhost:3000`
+A aplicação estará disponível em `http://localhost:3000`
 
-### Local Development
+### Desenvolvimento Local
 
-1. Install dependencies:
+1. Instale as dependências:
 ```bash
 npm install
 ```
 
-2. Start the development server:
+2. Inicie o servidor de desenvolvimento:
 ```bash
 npm run start:dev
 ```
 
-## 🔧 Environment Variables
+## 🔧 Variáveis de Ambiente
 
-The following environment variables are required:
+As seguintes variáveis são necessárias:
 
-- `NODE_ENV`: Application environment (development/production)
-- `PORT`: Application port (default: 3000)
-- `JWT_SECRET`: Secret key for JWT token generation
-- `JWT_EXPIRATION`: JWT token expiration time
-- `GOOGLE_CLIENT_ID`: Google OAuth client ID
-- `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
-- `GOOGLE_CALLBACK_URL`: Google OAuth callback URL
-- `DATABASE_URL`: Database connection URL
+- `NODE_ENV`: Ambiente da aplicação (development/production)
+- `PORT`: Porta da aplicação (padrão: 3000)
+- `JWT_SECRET`: Chave secreta para geração de tokens JWT
+- `JWT_EXPIRATION`: Tempo de expiração do token JWT
+- `GOOGLE_CLIENT_ID`: Client ID do Google OAuth
+- `GOOGLE_CLIENT_SECRET`: Client Secret do Google OAuth
+- `GOOGLE_CALLBACK_URL`: URL de callback do Google OAuth
+- `DATABASE_URL`: URL de conexão com o banco de dados
 
-## 📝 API Documentation
+## 📝 Documentação da API
 
-API documentation is available at `http://localhost:3000/api` when running the application.
+A documentação da API estará disponível em `http://localhost:3000/api` quando a aplicação estiver rodando.
 
 ## 🐳 Docker
 
-The application is containerized using Docker. The Dockerfile uses a multi-stage build to optimize the image size and security.
+A aplicação é containerizada utilizando Docker. O Dockerfile utiliza multi-stage build para otimizar o tamanho e a segurança da imagem.
 
-### Building the Image
+### Build da Imagem
 
 ```bash
-docker build -t nestjs-crud-app .
+docker build -t ze-da-fruta-backend .
 ```
 
-### Running with Docker Compose
+### Executando com Docker Compose
 
 ```bash
 docker-compose up
@@ -84,31 +84,31 @@ docker-compose up
 
 ## 🔍 Health Check
 
-The application includes a health check endpoint at `/health` that can be used to monitor the application's status.
+O endpoint `/health` pode ser utilizado para monitorar o status da aplicação.
 
-## 📦 Project Structure
+## 📦 Estrutura do Projeto
 
 ```
 nestjs-crud-app-2/
 ├── src/
-│   ├── auth/           # Authentication module
-│   ├── users/          # Users module
-│   ├── common/         # Common utilities and guards
-│   └── main.ts         # Application entry point
-├── test/               # Test files
-├── migrations/         # Database migrations
-├── Dockerfile         # Docker configuration
-├── docker-compose.yml # Docker Compose configuration
-└── .env.example       # Example environment variables
+│   ├── auth/           # Módulo de autenticação
+│   ├── users/          # Módulo de usuários
+│   ├── common/         # Utilitários e guards
+│   └── main.ts         # Ponto de entrada da aplicação
+├── test/               # Testes
+├── migrations/         # Migrations do banco
+├── Dockerfile          # Configuração Docker
+├── docker-compose.yml  # Configuração Docker Compose
+└── .env.example        # Exemplo de variáveis de ambiente
 ```
 
-## 🔐 Security
+## 🔐 Segurança
 
-- Environment variables are not committed to the repository
-- JWT tokens are used for authentication
-- Google OAuth integration for secure login
-- SQLite database with proper file permissions
+- Variáveis de ambiente não são versionadas
+- Autenticação via JWT
+- Integração com Google OAuth
+- Banco SQLite com permissões adequadas
 
-## 📄 License
+## 📄 Licença
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Este projeto está licenciado sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.

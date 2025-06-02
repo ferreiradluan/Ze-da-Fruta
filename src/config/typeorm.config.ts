@@ -10,7 +10,7 @@ export default new DataSource({
   type: 'better-sqlite3',
   database: isTest 
     ? join(__dirname, '..', '..', 'test', 'test.sqlite')
-    : join(__dirname, '..', '..', 'database.sqlite'),
+    : process.env.DATABASE_URL || join(__dirname, '..', '..', 'database.sqlite'),
   entities: [join(__dirname, '..', '**', '*.entity{.ts,.js}')],
   synchronize: true, // Habilita sincronização automática
-}); 
+});
