@@ -1,0 +1,42 @@
+### FLUXO DE TESTE VENDEDOR (PASSO A PASSO)
+
+# 1. Login Google (Cliente, Vendedor, Entregador)
+GET http://localhost:3000/auth/google
+
+# 2. Solicitar perfil de vendedor (se ainda não tiver)
+POST http://localhost:3000/perfil-usuario
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "perfil": "vendedor"
+}
+
+# 3. (ADMIN) Aprovar perfil de vendedor
+# Faça login como admin e aprove o perfil do usuário
+PUT http://localhost:3000/admin/entregadores/ID_DO_PERFIL/status
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+{
+  "status_aprovacao": "aprovado"
+}
+
+# 4. Trocar perfil ativo para vendedor
+PUT http://localhost:3000/auth/perfil-ativo
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "perfil": "vendedor"
+}
+
+# 5. Testar rota protegida de vendedor
+GET http://localhost:3000/vendedor/dashboard
+Authorization: Bearer {{authToken}}
+
+# 6. Se continuar erro 403, verifique:
+# - O token JWT está correto no header?
+# - O usuário tem perfil de vendedor aprovado no banco?
+# - O perfil ativo do usuário está como vendedor?
+# - O token não é de admin ou entregador?
+
+# DICA: Use jwt.io para decodificar o token e conferir claims/perfis.
