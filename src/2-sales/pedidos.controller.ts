@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { SalesService } from './sales.service';
 
 @Controller('sales/pedidos')
@@ -6,9 +7,10 @@ export class SalesPedidosController {
   constructor(private readonly salesService: SalesService) {}
 
   @Get('me')
-  getPedidosMe() {
-    // Implementar lógica para buscar pedidos do usuário autenticado
-    return this.salesService.getPedidosMe();
+  @UseGuards(AuthGuard('jwt'))
+  getPedidosMe(@Req() req: any) {
+    // Busca pedidos do usuário autenticado
+    return this.salesService.getPedidosByUserId(req.user.id);
   }
 
   @Post()

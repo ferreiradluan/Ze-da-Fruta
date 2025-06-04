@@ -42,4 +42,9 @@ export class SalesService {
     // lógica para adicionar item na sacola
     return { ...itemDto, adicionado: true };
   }
+  // Novo: buscar pedidos do usuário autenticado
+  getPedidosByUserId(userId: number) {
+    // lógica para buscar pedidos do usuário autenticado
+    return [{ id: 1, userId, status: 'finalizado' }];
+  }
 }
