@@ -7,7 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
-import { UsuariosModule } from './usuarios/usuarios.module';
 import { PedidosModule } from './pedidos/pedidos.module';
 import { EntregasModule } from './entregas/entregas.module';
 import { EnderecosModule } from './enderecos/enderecos.module';
@@ -26,6 +25,11 @@ import { VendedorModule } from './vendedor/vendedor.module';
 import { EntregadorModule } from './entregador/entregador.module';
 import { MinhaContaController } from './auth/minha-conta.controller';
 import { AdminModule } from './admin/admin.module';
+import { AccountModule } from './account/account.module';
+import { SalesModule } from './sales/sales.module';
+import { DeliveryModule } from './delivery/delivery.module';
+import { PaymentModule } from './payment/payment.module';
+import { AdminDomainModule } from './admin-domain/admin-domain.module';
 
 @Module({
   imports: [
@@ -50,11 +54,15 @@ import { AdminModule } from './admin/admin.module';
     }),
     // Módulos de autenticação primeiro
     AuthModule,
+    AccountModule,
+    SalesModule,
+    DeliveryModule,
+    PaymentModule,
+    AdminDomainModule,
     UsersModule,
     // Demais módulos
     ProductsModule,
     CategoriesModule,
-    UsuariosModule,
     PedidosModule,
     EntregasModule,
     EnderecosModule,
