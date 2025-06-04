@@ -7,7 +7,9 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Role } from './role.enum';
 import { Roles } from './roles.decorator';
+// Update the import path below to the correct location if different
 import { UserRole, UserProfileType } from '../users/entities/user.entity';
+// If the file does not exist, create 'user.entity.ts' in '../users/entities/' and export UserRole and UserProfileType from it.
 import { Public } from './decorators/public.decorator';
 
 @Controller('auth')
