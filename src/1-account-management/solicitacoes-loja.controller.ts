@@ -9,8 +9,6 @@ export class SolicitacoesLojaController {
   @ApiResponse({ status: 201, description: 'Solicitação criada com sucesso' })
   async solicitarLoja(@Body() solicitacaoDto: any) {
     // TODO: Implementar lógica para criar solicitação de loja
-    // Exemplo de resposta:
-    // return { id: 1, ...solicitacaoDto };
     return { message: 'Solicitação de loja recebida.' };
   }
 }

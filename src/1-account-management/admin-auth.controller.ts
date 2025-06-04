@@ -10,8 +10,6 @@ export class AdminAuthController {
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
   async login(@Body() loginDto: { email: string; senha: string }) {
     // TODO: Implementar lógica de autenticação de admin
-    // Exemplo de resposta:
-    // return { access_token: 'jwt_token' };
     return { message: 'Login de admin não implementado.' };
   }
 }
