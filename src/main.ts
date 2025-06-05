@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { INestApplication } from '@nestjs/common';
 import { UsersService } from './users/users.service';
 import { UserRole, UserProfileType } from './users/entities/user.entity';
+import { json, urlencoded } from 'express';
 
 async function seedAdminUser(app: INestApplication) {
   const usersService = app.get(UsersService);
@@ -30,7 +31,13 @@ async function seedAdminUser(app: INestApplication) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  
+
+  // Configuração para Stripe Webhook: rawBody
+  app.use('/payment/webhook/stripe',
+    urlencoded({ extended: false }),
+    json({ verify: (req: any, res, buf) => { req.rawBody = buf; } })
+  );
+
   // Enable security headers
   app.use(helmet());
   
@@ -49,16 +56,28 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }));
 
-  // Swagger documentation
+  // Swagger documentation com tags por domínio de negócio
   const config = new DocumentBuilder()
-    .setTitle('API Documentation')
-    .setDescription('API documentation for the e-commerce platform')
+    .setTitle('Zé da Fruta - API por Domínio de Negócio')
+    .setDescription('Documentação da API organizada por domínios de negócio: Account Management, Sales, Delivery, Payment, Admin.')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-  
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+
+  const document = SwaggerModule.createDocument(app, config, {
+    // Agrupa controllers por domínio de negócio usando tags
+    extraModels: [],
+    deepScanRoutes: true,
+    // Você pode adicionar filtros ou customizações aqui se quiser separar ainda mais
+  });
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+      docExpansion: 'list',
+    },
+    customSiteTitle: 'Zé da Fruta - API por Domínio de Negócio',
+  });
 
   const port = configService.get('PORT') || 3000;
   await seedAdminUser(app);
