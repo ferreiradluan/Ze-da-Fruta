@@ -7,7 +7,7 @@ import * as bcrypt from 'bcryptjs';
 @Injectable()
 export class AuthService {
   private readonly MAX_LOGIN_ATTEMPTS = 5;
-  private readonly LOCK_TIME = 15 * 60 * 1000; // 15 minutes in milliseconds
+  private readonly LOCK_TIME = 15 * 60 * 1000;
 
   constructor(
     private readonly usersService: UsersService,
@@ -47,8 +47,7 @@ export class AuthService {
   }
 
   private async handleSuccessfulLogin(user: User) {
-    // Reset login attempts on successful login
-    await this.usersService.update(user.userId, {
+    await this.usersService.update(user.id, {
       loginAttempts: 0,
       lastLoginAt: new Date(),
       lockedUntil: undefined,
@@ -61,7 +60,7 @@ export class AuthService {
         throw new UnauthorizedException('Conta bloqueada temporariamente. Tente novamente em 15 minutos.');
       }
       // Reset attempts if lock time has passed
-      await this.usersService.update(user.userId, {
+      await this.usersService.update(user.id, {
         loginAttempts: 0,
         lockedUntil: undefined,
         lastLoginAt: new Date(),
@@ -71,9 +70,7 @@ export class AuthService {
 
   async validateGoogleUser(profile: any) {
     const { email, firstName, lastName, picture } = profile;
-    
     let user = await this.usersService.findByEmail(email);
-    
     if (!user) {
       user = await this.usersService.create({
         email,
@@ -81,32 +78,29 @@ export class AuthService {
         lastName,
         picture,
         provider: 'google',
-        isEmailVerified: true, // Google emails are verified
+        isEmailVerified: true,
         role: UserRole.USER,
-        profileType: UserProfileType.CUSTOMER,
+        profileType: UserProfileType.BASIC,
       });
     }
-
     await this.handleSuccessfulLogin(user);
     return user;
   }
 
   async login(user: User) {
     await this.checkAccountLock(user);
-
-    const payload = { 
-      sub: user.userId, 
+    const payload = {
+      sub: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
       profileType: user.profileType,
     };
-
     return {
       access_token: this.jwtService.sign(payload),
       user: {
-        id: user.userId,
+        id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -156,8 +150,6 @@ export class AuthService {
 
   // Novo método para login Google de lojista/entregador
   async loginParceiroGoogle(token: string, tipo: 'lojista' | 'entregador') {
-    // Aqui você faria a validação do token Google e buscaria/criaria o usuário parceiro
-    // Exemplo simplificado:
     const googleProfile = await this.validateGoogleToken(token);
     let user = await this.usersService.findByEmail(googleProfile.email);
     if (!user) {
@@ -169,7 +161,7 @@ export class AuthService {
         provider: 'google',
         isEmailVerified: true,
         role: tipo === 'lojista' ? UserRole.SELLER : UserRole.DELIVERY_PERSON,
-        profileType: tipo === 'lojista' ? UserProfileType.SELLER : UserProfileType.DELIVERY_PERSON,
+        profileType: tipo === 'lojista' ? UserProfileType.BASIC : UserProfileType.BASIC,
       });
     }
     await this.handleSuccessfulLogin(user);

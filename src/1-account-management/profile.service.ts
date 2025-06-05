@@ -22,13 +22,11 @@ export class AccountProfileService {
     return this.usersRepository.delete(userId);
   }
 
-  // Novo: listar endereços do usuário
   async getEnderecos(userId: number) {
     const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['enderecos'] });
     return user?.enderecos || [];
   }
 
-  // Novo: adicionar endereço ao usuário
   async addEndereco(userId: number, enderecoDto: any) {
     const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['enderecos'] });
     if (!user) throw new Error('Usuário não encontrado');

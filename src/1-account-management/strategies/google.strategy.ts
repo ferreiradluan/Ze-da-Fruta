@@ -1,7 +1,6 @@
 import * as dotenv from 'dotenv';
 import { join } from 'path';
 
-// Carrega o arquivo .env explicitamente
 dotenv.config({ path: join(__dirname, '..', '.env') });
 
 import { Injectable } from '@nestjs/common';
@@ -12,17 +11,14 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private readonly configService: ConfigService) {
-    // Tenta obter valores do ConfigService
     let clientID = configService.get<string>('GOOGLE_CLIENT_ID');
     let clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
     let callbackURL = configService.get<string>('GOOGLE_CALLBACK_URL');
     
-    // Tenta obter diretamente do process.env se não encontrado no ConfigService
     clientID = clientID || process.env.GOOGLE_CLIENT_ID;
     clientSecret = clientSecret || process.env.GOOGLE_CLIENT_SECRET;
     callbackURL = callbackURL || process.env.GOOGLE_CALLBACK_URL;
     
-    // Fornece mensagens de erro detalhadas sobre qual variável está faltando
     if (!clientID) console.error('Erro: GOOGLE_CLIENT_ID não encontrado');
     if (!clientSecret) console.error('Erro: GOOGLE_CLIENT_SECRET não encontrado');
     if (!callbackURL) console.error('Erro: GOOGLE_CALLBACK_URL não encontrado');

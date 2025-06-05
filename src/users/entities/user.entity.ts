@@ -7,7 +7,41 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number = 0;
 
-  // ...outras propriedades...
+  @Column({ unique: true })
+  email: string = '';
+
+  @Column({ nullable: true })
+  senha?: string;
+
+  @Column({ nullable: true })
+  firstName?: string;
+
+  @Column({ nullable: true })
+  lastName?: string;
+
+  @Column({ nullable: true })
+  picture?: string;
+
+  @Column({ default: 'user' })
+  role: UserRole = UserRole.USER;
+
+  @Column({ default: 'basic' })
+  profileType: UserProfileType = UserProfileType.BASIC;
+
+  @Column({ default: 'local' })
+  provider: string = 'local';
+
+  @Column({ default: false })
+  isEmailVerified: boolean = false;
+
+  @Column({ default: 0 })
+  loginAttempts: number = 0;
+
+  @Column({ type: 'datetime', nullable: true })
+  lastLoginAt?: Date;
+
+  @Column({ type: 'datetime', nullable: true })
+  lockedUntil?: Date;
 
   @OneToMany(() => Endereco, (endereco) => endereco.user)
   enderecos: Endereco[] = [];

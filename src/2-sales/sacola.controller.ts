@@ -7,7 +7,6 @@ export class SalesSacolaController {
 
   @Get()
   getSacola() {
-    // Implementar lógica para buscar sacola do usuário autenticado
     return this.salesService.getSacola();
   }
 

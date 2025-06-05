@@ -9,7 +9,6 @@ export class SalesPedidosController {
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   getPedidosMe(@Req() req: any) {
-    // Busca pedidos do usuário autenticado
     return this.salesService.getPedidosByUserId(req.user.id);
   }
 
