@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Delete, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Delete, Body, Req, UseGuards, Post } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AccountProfileService } from './profile.service';
@@ -25,5 +25,17 @@ export class AccountProfileController {
   @ApiOperation({ summary: 'Remover conta do usuário autenticado' })
   async removeMe(@Req() req: any) {
     return this.accountProfileService.remove(req.user.userId);
+  }
+
+  @Get('me/enderecos')
+  @ApiOperation({ summary: 'Listar endereços do usuário autenticado' })
+  async getMeEnderecos(@Req() req: any) {
+    return this.accountProfileService.getEnderecos(req.user.userId);
+  }
+
+  @Post('me/enderecos')
+  @ApiOperation({ summary: 'Adicionar endereço ao usuário autenticado' })
+  async addEndereco(@Req() req: any, @Body() enderecoDto: any) {
+    return this.accountProfileService.addEndereco(req.user.userId, enderecoDto);
   }
 }
