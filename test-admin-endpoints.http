@@ -1,0 +1,193 @@
+# Testes para os endpoints do Admin - Passo 3
+# Gestão Administrativa - Usuários e Reembolsos
+# Implementação dos novos endpoints Admin conforme especificação
+
+### 1. Login como Admin (obter token JWT)
+# Primeiro, precisamos fazer login para obter o token JWT de administrador
+POST http://localhost:3000/auth/admin/login
+Content-Type: application/json
+
+{
+  "email": "admin@zefruta.com",
+  "password": "admin123"
+}
+
+###
+# Definir variável token (copiar do response acima)
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### 2. Listar todos os usuários - sem filtros
+# GET /admin/usuarios - Buscar e listar todos os usuários
+GET http://localhost:3000/admin/usuarios
+Authorization: Bearer {{token}}
+
+### 3. Listar usuários com filtro de busca por nome/email
+# Buscar usuários que contenham "joão" no nome ou email
+GET http://localhost:3000/admin/usuarios?search=joão
+Authorization: Bearer {{token}}
+
+### 4. Listar usuários por status - ATIVO
+# Filtrar apenas usuários ativos
+GET http://localhost:3000/admin/usuarios?status=ATIVO
+Authorization: Bearer {{token}}
+
+### 5. Listar usuários por status - SUSPENSO
+# Filtrar apenas usuários suspensos
+GET http://localhost:3000/admin/usuarios?status=SUSPENSO
+Authorization: Bearer {{token}}
+
+### 6. Listar usuários por roles - USER
+# Filtrar apenas usuários com role USER
+GET http://localhost:3000/admin/usuarios?roles=USER
+Authorization: Bearer {{token}}
+
+### 7. Listar usuários por roles - PARTNER
+# Filtrar apenas usuários com role PARTNER
+GET http://localhost:3000/admin/usuarios?roles=PARTNER
+Authorization: Bearer {{token}}
+
+### 8. Listar usuários com múltiplos filtros
+# Combinar filtros: busca + status + paginação
+GET http://localhost:3000/admin/usuarios?search=silva&status=ATIVO&page=1&limit=5
+Authorization: Bearer {{token}}
+
+### 9. Listar usuários com paginação
+# Testar paginação - página 2, 10 itens por página
+GET http://localhost:3000/admin/usuarios?page=2&limit=10
+Authorization: Bearer {{token}}
+
+### 10. Alterar status de usuário para SUSPENSO
+# PUT /admin/usuarios/{id}/status - Suspender usuário
+PUT http://localhost:3000/admin/usuarios/{{usuarioId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "SUSPENSO",
+  "motivo": "Violação dos termos de serviço - comportamento inadequado"
+}
+
+### 11. Alterar status de usuário para ATIVO
+# Reativar usuário que estava suspenso
+PUT http://localhost:3000/admin/usuarios/{{usuarioId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "ATIVO",
+  "motivo": "Revisão do caso - situação regularizada"
+}
+
+### 12. Alterar status de usuário para INATIVO
+# Inativar usuário
+PUT http://localhost:3000/admin/usuarios/{{usuarioId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "INATIVO"
+}
+
+### 13. Iniciar reembolso de pedido
+# POST /admin/pedidos/{id}/reembolso - Processar reembolso
+POST http://localhost:3000/admin/pedidos/{{pedidoId}}/reembolso
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "motivo": "Produto defeituoso - cliente solicitou devolução"
+}
+
+### 14. Iniciar reembolso com motivo de cancelamento
+# Reembolso por cancelamento do pedido
+POST http://localhost:3000/admin/pedidos/{{pedidoId}}/reembolso
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "motivo": "Pedido cancelado pelo cliente antes da entrega"
+}
+
+### 15. Iniciar reembolso com motivo de qualidade
+# Reembolso por problemas de qualidade
+POST http://localhost:3000/admin/pedidos/{{pedidoId}}/reembolso
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "motivo": "Frutas chegaram estragadas - insatisfação com qualidade"
+}
+
+### 16. Teste de erro - alterar status inválido
+# Deve retornar erro 400 - status inválido
+PUT http://localhost:3000/admin/usuarios/{{usuarioId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "STATUS_INVALIDO"
+}
+
+### 17. Teste de erro - usuário não encontrado
+# Deve retornar erro 404 - usuário não existe
+PUT http://localhost:3000/admin/usuarios/usuario-inexistente-uuid/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "ATIVO"
+}
+
+### 18. Teste de erro - reembolso sem motivo
+# Deve retornar erro 400 - motivo é obrigatório
+POST http://localhost:3000/admin/pedidos/{{pedidoId}}/reembolso
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+}
+
+### 19. Teste de erro - pedido não encontrado
+# Deve retornar erro 404 - pedido não existe
+POST http://localhost:3000/admin/pedidos/pedido-inexistente-uuid/reembolso
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "motivo": "Teste de pedido inexistente"
+}
+
+### 20. Teste de acesso negado - sem token
+# Deve retornar erro 401 - não autenticado
+GET http://localhost:3000/admin/usuarios
+
+### 21. Teste de acesso negado - token de USER
+# Deve retornar erro 403 - não autorizado (precisa ser ADMIN)
+GET http://localhost:3000/admin/usuarios
+Authorization: Bearer {{user_token}}
+
+### 22. Verificar dashboard administrativo
+# Endpoint de dashboard para context
+GET http://localhost:3000/admin/dashboard
+Authorization: Bearer {{token}}
+
+### 23. Verificar estatísticas das solicitações
+# Endpoint de estatísticas para context
+GET http://localhost:3000/admin/solicitacoes/estatisticas
+Authorization: Bearer {{token}}
+
+### 24. Buscar usuários com filtro vazio
+# Testar comportamento com filtros vazios
+GET http://localhost:3000/admin/usuarios?search=&status=&roles=
+Authorization: Bearer {{token}}
+
+### 25. Testar combinação complexa de filtros
+# Múltiplos roles + busca + status
+GET http://localhost:3000/admin/usuarios?search=teste&status=ATIVO&roles=USER,PARTNER&page=1&limit=20
+Authorization: Bearer {{token}}
+
+###
+# Variáveis de teste (substitua pelos IDs reais do seu sistema)
+# @usuarioId = uuid-do-usuario-teste
+# @pedidoId = uuid-do-pedido-teste
+# @user_token = token-jwt-de-usuario-comum

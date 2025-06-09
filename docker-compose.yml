@@ -1,0 +1,9 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./db:/usr/src/app/db
+    env_file:
+      - .env

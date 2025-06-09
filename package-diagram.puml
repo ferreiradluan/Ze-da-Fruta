@@ -1,0 +1,282 @@
+@startuml Ze-da-Fruta-Package-Diagram
+!theme plain
+skinparam packageStyle rectangle
+skinparam package {
+  BorderColor black
+  BackgroundColor lightgray
+  FontSize 11
+}
+
+title Ze da Fruta - Diagrama de Pacotes (Arquitetura Hexagonal + DDD)
+
+package "src" <<Folder>> {
+
+  package "app.module.ts\nmain.ts" <<File>> {
+    note right: Bootstrap da aplicação
+  }
+
+  package "common" <<SharedKernel>> {
+    package "core" {
+      class BaseEntity
+      class BusinessRuleViolationException
+    }
+    
+    package "event-bus" {
+      class EventBusService
+      class EventBusModule
+      note right: ✅ Domain Events\nComunicação assíncrona
+    }
+  }
+
+  package "1-account-management" <<BoundedContext>> {
+    package "api" <<Adapters>> {
+      package "controllers" {
+        class AuthController
+        class AccountController
+        class PartnerOnboardingController
+      }
+      package "dto" {
+        class CreateUserDto
+        class UpdateUserDto
+      }
+    }
+    
+    package "application" <<Ports>> {
+      package "services" {
+        class AuthService
+        class AccountService
+        class PartnerOnboardingService
+      }
+    }
+    
+    package "domain" <<Core>> {
+      package "entities" {
+        class Usuario <<AggregateRoot>>
+        class Admin
+        class SolicitacaoParceiro <<AggregateRoot>>
+        class Role
+        class Endereco
+      }
+      
+      package "enums" {
+        enum StatusUsuario
+        enum TipoSolicitacao
+        enum StatusSolicitacao
+      }
+      
+      package "events" {
+        class SolicitacaoRecebidaEvent
+      }
+    }
+    
+    package "infrastructure" <<Adapters>> {
+      package "repositories" {
+        class SolicitacaoParceiroRepository
+        class RoleRepository
+      }
+    }
+  }
+
+  package "2-sales" <<BoundedContext>> {
+    package "api" <<Adapters>> {
+      package "controllers" {
+        class ProdutosController
+        class PedidosController
+        class LojasController
+        class CategoriasController
+        class CuponsController
+      }
+      package "dto" {
+        class CreateProdutoDto
+        class CreatePedidoDto
+        class ListarProdutosDto
+      }
+    }
+    
+    package "application" <<Ports>> {
+      package "services" {
+        class SalesService
+        note right: ❌ 1100+ linhas\nTransaction Script
+      }
+    }
+    
+    package "domain" <<Core>> {
+      package "entities" {
+        class Produto
+        class Pedido <<AggregateRoot>>
+        class ItemPedido
+        class Cupom
+        class Categoria
+        class Estabelecimento
+        
+        note top of Pedido: ✅ Rich Domain Model\nadicionarItem()\naplicarCupom()\ncalcularTotal()
+      }
+      
+      package "value-objects" {
+        class Dinheiro <<ValueObject>>
+        note right: ✅ Imutável\nsomar(), subtrair()
+      }
+      
+      package "enums" {
+        enum StatusPedido
+        enum TipoDesconto
+      }
+      
+      package "events" {
+        class PedidoConfirmadoEvent
+      }
+    }
+  }
+
+  package "3-delivery" <<BoundedContext>> {
+    package "api" <<Adapters>> {
+      package "controllers" {
+        class DeliveryController
+      }
+    }
+    
+    package "application" <<Ports>> {
+      package "services" {
+        class DeliveryService
+        note right: ✅ Event-driven\nReage a pedido.criado
+      }
+    }
+    
+    package "domain" <<Core>> {
+      package "entities" {
+        class Entregador
+        class Entrega <<AggregateRoot>>
+        
+        note top of Entrega: ✅ Business Rules\nconfirmarRetirada()\nconfirmarEntrega()
+      }
+      
+      package "value-objects" {
+        class EnderecoVO <<ValueObject>>
+      }
+      
+      package "enums" {
+        enum StatusEntrega
+        enum StatusEntregador
+      }
+    }
+    
+    package "infrastructure" <<Adapters>> {
+      package "repositories" {
+        class EntregaRepository
+      }
+    }
+  }
+
+  package "4-payment" <<BoundedContext>> {
+    package "api" <<Adapters>> {
+      package "controllers" {
+        class PaymentController
+      }
+    }
+    
+    package "application" <<Ports>> {
+      package "services" {
+        class PaymentService
+        class EstoqueService
+        note right: ✅ External Integration\nStripe
+      }
+    }
+    
+    package "domain" <<Core>> {
+      package "entities" {
+        class Pagamento <<AggregateRoot>>
+        note right: ✅ Rich Methods\naprovar(), recusar()\nestornar()
+      }
+      
+      package "enums" {
+        enum StatusPagamento
+        enum TipoPagamento
+      }
+    }
+  }
+
+  package "5-admin" <<BoundedContext>> {
+    package "api" <<Adapters>> {
+      package "controllers" {
+        class AdminController
+      }
+    }
+    
+    package "application" <<Ports>> {
+      package "services" {
+        class AdminService
+        note right: ⚠️ Cross-domain\nAcesso a múltiplos módulos
+      }
+    }
+  }
+}
+
+package "External Systems" <<Cloud>> {
+  class "Google OAuth"
+  class "Stripe API"
+  class "TypeORM Database"
+}
+
+' Dependencies
+Usuario --> Role : ManyToMany
+Produto --> Categoria : ManyToMany
+Produto --> Estabelecimento : ManyToOne
+Pedido --> ItemPedido : OneToMany
+Pedido --> Cupom : ManyToOne
+ItemPedido --> Produto : ManyToOne
+
+' Cross-module dependencies (via Events)
+SalesService ..> EventBusService : emits "pedido.criado"
+DeliveryService ..> EventBusService : listens "pedido.criado"
+PaymentService ..> EventBusService : listens "pedido.confirmado"
+
+' External dependencies
+AuthService --> "Google OAuth"
+PaymentService --> "Stripe API"
+"*Repository" --> "TypeORM Database"
+
+' Admin cross-cutting
+AdminService --> AccountService
+AdminService --> SalesService
+AdminService --> PaymentService
+
+note top of "2-sales"
+  **PROBLEMA PRINCIPAL:**
+  Lógica de negócio concentrada
+  no SalesService em vez das
+  entidades de domínio
+end note
+
+note top of "1-account-management"
+  **PONTO FORTE:**
+  Usuario e SolicitacaoParceiro
+  com métodos de negócio ricos
+end note
+
+note top of EventBusService
+  **EXCELENTE:**
+  Comunicação entre bounded
+  contexts via domain events
+end note
+
+note bottom
+  **ARQUITETURA HEXAGONAL:**
+  
+  **API (Adapters):** Controllers + DTOs
+  **Application (Ports):** Services de aplicação
+  **Domain (Core):** Entities + VOs + Events
+  **Infrastructure (Adapters):** Repositories + External
+  
+  **BOUNDED CONTEXTS:**
+  - Account Management (Usuários)
+  - Sales (Produtos & Pedidos)  
+  - Delivery (Entregas)
+  - Payment (Pagamentos)
+  - Admin (Gestão cross-domain)
+  
+  **COMUNICAÇÃO:**
+  - Síncrona: Dependency Injection
+  - Assíncrona: Domain Events (EventBus)
+end note
+
+@enduml

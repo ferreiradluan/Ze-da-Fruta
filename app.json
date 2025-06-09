@@ -1,0 +1,93 @@
+{
+  "name": "Ze da Fruta Backend",
+  "description": "API de delivery de frutas desenvolvida com NestJS",
+  "repository": "https://github.com/seu-usuario/ze-da-fruta-backend",
+  "logo": "https://nodejs.org/static/images/logos/nodejs-new-pantone-black.svg",
+  "keywords": ["node", "nestjs", "typescript", "sqlite", "api", "delivery"],
+  "image": "heroku/nodejs",
+  "stack": "heroku-20",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [],
+  "env": {
+    "NODE_ENV": {
+      "description": "Ambiente da aplicação",
+      "value": "production",
+      "required": true
+    },
+    "DATABASE_PATH": {
+      "description": "Caminho para o arquivo do banco SQLite",
+      "value": "./ze_da_fruta.sqlite",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Chave secreta para JWT (mínimo 32 caracteres)",
+      "generator": "secret",
+      "required": true
+    },
+    "JWT_EXPIRES_IN": {
+      "description": "Tempo de expiração do JWT",
+      "value": "1d",
+      "required": true
+    },
+    "API_KEY": {
+      "description": "Chave da API para acesso de alto volume",
+      "generator": "secret",
+      "required": false
+    },
+    "RATE_LIMIT_PUBLIC_TTL": {
+      "description": "TTL para rate limiting público (segundos)",
+      "value": "60",
+      "required": true
+    },
+    "RATE_LIMIT_PUBLIC_LIMIT": {
+      "description": "Limite de requests públicos por TTL",
+      "value": "50",
+      "required": true
+    },
+    "RATE_LIMIT_AUTH_TTL": {
+      "description": "TTL para rate limiting autenticado (segundos)",
+      "value": "60",
+      "required": true
+    },
+    "RATE_LIMIT_AUTH_LIMIT": {
+      "description": "Limite de requests autenticados por TTL",
+      "value": "200",
+      "required": true
+    },
+    "HELMET_ENABLED": {
+      "description": "Habilitar headers de segurança Helmet",
+      "value": "true",
+      "required": true
+    },
+    "CORS_ORIGIN": {
+      "description": "URL permitida para CORS",
+      "value": "https://seu-frontend.herokuapp.com",
+      "required": true
+    },
+    "FRONTEND_URL": {
+      "description": "URL do frontend da aplicação",
+      "value": "https://seu-frontend.herokuapp.com",
+      "required": true
+    }
+  },
+  "scripts": {
+    "postdeploy": "npm run seed:prod"
+  },
+  "environments": {
+    "test": {
+      "scripts": {
+        "test": "npm test"
+      }
+    }
+  }
+}
