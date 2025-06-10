@@ -17,6 +17,23 @@
 
 ---
 
+## 🌐 Deploy em Produção
+
+<div align="center">
+
+### 🚀 **Aplicação Online**
+**API Backend:** [https://meu-ze-da-fruta-backend-8c4976f28553.herokuapp.com](https://meu-ze-da-fruta-backend-8c4976f28553.herokuapp.com)
+
+### 📚 **Documentação Swagger**
+**Interface Interativa:** [https://meu-ze-da-fruta-backend-8c4976f28553.herokuapp.com/api#/](https://meu-ze-da-fruta-backend-8c4976f28553.herokuapp.com/api#/)
+
+![Heroku](https://img.shields.io/badge/Heroku-Deployed-purple)
+![API Status](https://img.shields.io/badge/API-Online-brightgreen)
+
+</div>
+
+---
+
 ## 📋 Sobre o Projeto
 
 O **Ze da Fruta** é uma plataforma completa de delivery de hortifrúti que conecta consumidores, parceiros comerciais e administradores em um ecossistema digital robusto. O backend foi desenvolvido utilizando as melhores práticas de arquitetura de software, oferecendo uma API RESTful escalável e segura.
