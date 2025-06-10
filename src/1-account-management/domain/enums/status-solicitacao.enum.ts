@@ -1,0 +1,7 @@
+export enum StatusSolicitacao {
+  PENDENTE = 'PENDENTE',
+  EM_ANALISE = 'EM_ANALISE', 
+  APROVADA = 'APROVADA',
+  REJEITADA = 'REJEITADA',
+  CANCELADA = 'CANCELADA'
+}

@@ -1,0 +1,75 @@
+### Upload Test Endpoints for Ze da Fruta Backend
+### 
+### NOTE: You need to:
+### 1. Start the server (npm run start:dev)
+### 2. Login as a user to get JWT token
+### 3. Replace {{token}} with actual JWT token
+### 4. Replace file paths with actual image files on your system
+###
+
+### Variables (replace with actual values)
+@baseUrl = http://localhost:3000
+@token = your-jwt-token-here
+@productId = existing-product-id
+@establishmentId = existing-establishment-id
+
+### 1. Upload Profile Photo (Any authenticated user)
+POST {{baseUrl}}/upload/profile-photo
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/your/profile-image.jpg
+--boundary--
+
+### 2. Delete Profile Photo (Any authenticated user)
+DELETE {{baseUrl}}/upload/profile-photo
+Authorization: Bearer {{token}}
+
+### 3. Upload Product Photo (Admin/Partner only)
+POST {{baseUrl}}/upload/product-photo/{{productId}}
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="product.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/your/product-image.jpg
+--boundary--
+
+### 4. Upload Establishment Photo (Admin/Partner only)
+POST {{baseUrl}}/upload/establishment-photo/{{establishmentId}}
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="establishment.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/your/establishment-image.jpg
+--boundary--
+
+### CURL Examples for Terminal Testing:
+
+### Profile Photo Upload (bash/cmd):
+# curl -X POST http://localhost:3000/upload/profile-photo \
+#   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+#   -F "image=@path/to/your/image.jpg"
+
+### Profile Photo Delete (bash/cmd):
+# curl -X DELETE http://localhost:3000/upload/profile-photo \
+#   -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+### Product Photo Upload (bash/cmd):
+# curl -X POST http://localhost:3000/upload/product-photo/PRODUCT_ID \
+#   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+#   -F "image=@path/to/your/image.jpg"
+
+### Establishment Photo Upload (bash/cmd):
+# curl -X POST http://localhost:3000/upload/establishment-photo/ESTABLISHMENT_ID \
+#   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+#   -F "image=@path/to/your/image.jpg"

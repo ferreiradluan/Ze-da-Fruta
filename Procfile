@@ -1,0 +1,1 @@
+web: node scripts/heroku-setup.js && npm run start:prod
