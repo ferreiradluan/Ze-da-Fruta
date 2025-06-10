@@ -287,7 +287,7 @@ Este projeto está licenciado sob a **MIT License**. Consulte o arquivo [LICENSE
 
 ## 📞 Suporte
 
-- 📧 **Email**: suporte@zedafruta.com
+- 📧 **Email**: luanhsouzaf@gmail.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/ferreiradluan/Ze-da-Fruta/issues)
 - 📖 **Wiki**: [Documentação Completa](https://github.com/ferreiradluan/Ze-da-Fruta/wiki)
 
