@@ -1,4 +1,4 @@
-## 🍎 Ze da Fruta - Backend
+# 🍎 Ze da Fruta - Backend
 
 <div align="center">
 
