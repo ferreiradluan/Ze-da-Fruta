@@ -1,0 +1,164 @@
+@startuml
+' Título do Diagrama
+title Diagrama de Classes Final - Domínio: 2-sales (Vendas)
+
+' Configurações visuais para clareza
+skinparam classAttributeIconSize 0
+hide empty members
+
+' Nota geral sobre a simplificação do diagrama
+note as DiagramNote
+Nota de Modelagem:
+Para manter a clareza, o diagrama omite getters/setters
+e métodos CRUD básicos (ex: findById, save), que
+são considerados implícitos na camada de Repository.
+O foco está nos métodos de negócio (Domínio Rico).
+end note
+
+' ===================================
+' Camada de Lógica de Negócio (Services)
+' ===================================
+class SalesService <> {
+
+    criarPedido(clienteId, dadosSacola)
+    obterPedido(pedidoId, clienteId)
+    listarProdutosDeLoja(lojaId)
+    obterDetalhesProduto(produtoId)
+    aplicarCupomAoPedido(pedidoId, codigoCupom)
+    }
+    note right of SalesService
+    Orquestra as operações de venda,
+    utilizando os Repositories para acesso a dados
+    e invocando os métodos das próprias entidades
+    para executar regras de negócio.
+    end note
+
+' ===================================
+' Camada de Acesso a Dados (Repositories)
+' ===================================
+package "Camada de Acesso a Dados" <> {
+class PedidoRepository <>
+class ProdutoRepository <>
+class EstabelecimentoRepository <>
+class CupomRepository <>
+}
+
+' ===================================
+' Camada de API (Controllers)
+' ===================================
+package "Camada de API" <> {
+class PedidosController <>
+class ProdutosController <>
+class LojasController <>
+}
+
+' ===================================
+' Camada de Domínio (Rich Domain Model)
+' ===================================
+class Pedido <> <> {
+
+    id: UUID
+    clienteId: UUID
+    status: StatusPedido
+    valorTotal: Dinheiro
+    --
+
+    adicionarItem(produto, quantidade)
+    removerItem(itemId: UUID)
+    calcularTotal()
+    aplicarCupom(cupom)
+    confirmar()
+    cancelar()
+    }
+    note right of Pedido::clienteId
+    Refere-se ao ID do Usuario
+    no domínio de Gestão de Contas.
+    end note
+
+class ItemPedido <> {
+
+    quantidade: Integer
+    precoUnitario: Dinheiro
+    --
+
+    calcularSubtotal(): Dinheiro
+    }
+
+class Produto <> <> {
+
+    id: UUID
+    nome: String
+    preco: Dinheiro
+    estoque: Integer
+    --
+
+    estaDisponivel(): Boolean
+    reduzirEstoque(quantidade)
+    atualizarPreco(novoPreco)
+    }
+
+class Estabelecimento <> <> {
+
+    id: UUID
+    nome: String
+    estaAberto: Boolean
+    --
+
+    abrir()
+    fechar()
+    }
+
+class Categoria <> <> {
+
+    id: UUID
+    nome: String
+    }
+
+class Cupom <> <> {
+
+    id: UUID
+    codigo: String
+    valorDesconto: Dinheiro
+    dataValidade: Date
+    --
+
+    estaValido(): Boolean
+    calcularDesconto(subtotal): Dinheiro
+    }
+
+enum StatusPedido <> {
+PAGAMENTO_PENDENTE
+PAGO
+EM_PREPARACAO
+AGUARDANDO_ENTREGADOR
+ENTREGUE
+CANCELADO
+}
+
+' ===================================
+' Relacionamentos
+' ===================================
+
+' --- Dependências entre Camadas ---
+PedidosController ..> SalesService
+ProdutosController ..> SalesService
+LojasController ..> SalesService
+
+SalesService ..> PedidoRepository
+SalesService ..> ProdutoRepository
+' ... e outros repositórios
+
+' Dependência do Serviço com as Entidades (para invocar métodos de negócio)
+SalesService ..> Pedido
+SalesService ..> Produto
+SalesService ..> Cupom
+
+' --- Relações Chave entre Entidades ---
+Pedido "1" --* "1.." ItemPedido : contém >
+ItemPedido "" -- "1" Produto : refere-se a >
+Estabelecimento "1" --* "0.." Produto : vende >
+Categoria "1" -- "0..*" Produto : agrupa >
+Pedido "1" -- "0..1" Cupom : aplica >
+Pedido --> StatusPedido
+
+@enduml

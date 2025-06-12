@@ -28,7 +28,6 @@ import { RolesGuard } from '../../1-account-management/application/strategies/gu
 import { Roles } from '../../1-account-management/application/strategies/guards/roles.decorator';
 import { RoleType } from '../../1-account-management/domain/enums/role-type.enum';
 import { AccountService } from '../../1-account-management/application/services/account.service';
-import { SalesService } from '../../2-sales/application/services/sales.service';
 import { DeliveryService } from '../../3-delivery/application/services/delivery.service';
 
 @ApiTags('📤 Upload')
@@ -39,7 +38,6 @@ export class UploadController {
   constructor(
     private readonly imageService: ImageService,
     private readonly accountService: AccountService,
-    private readonly salesService: SalesService,
     private readonly deliveryService: DeliveryService,
   ) {}
 
@@ -139,139 +137,23 @@ export class UploadController {
       default:
         throw new BadRequestException('Invalid user role');
     }
-
-    return {
-      message: 'Profile photo deleted successfully',
-    };
   }
 
+// COMMENTED OUT - Product and establishment photo upload methods temporarily disabled
+  // These methods use removed SalesService methods that violate the PlantUML diagram constraints
+  
+  /*
   @Post('product-photo/:productId')
   @Roles(RoleType.ADMIN, RoleType.PARTNER)
-  @UseInterceptors(FileInterceptor('image', multerConfig))
-  @ApiOperation({ summary: 'Upload product photo (Admin/Partner only)' })
-  @ApiConsumes('multipart/form-data')
-  @ApiParam({
-    name: 'productId',
-    type: 'string',
-    description: 'Product ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Product photo uploaded successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Product photo uploaded successfully' },
-        imageUrl: { type: 'string', example: '/uploads/products/product-123-image.png' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid file format or file too large',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'User not authenticated',
-  })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'Insufficient permissions - Admin/Partner role required',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Product not found',
-  })
-  async uploadProductPhoto(
-    @Param('productId') productId: string,
-    @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
-  ) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
-
-    // Verify product exists using existing method
-    const product = await this.salesService.buscarProdutoPorId(productId);
-    if (!product) {
-      throw new NotFoundException('Product not found');
-    }
-
-    // Process and save the image
-    const imageResult = await this.imageService.processAndSaveImage(file, ImageType.PRODUCT, productId);
-
-    // Update product with new image URL
-    await this.salesService.updateProductImage(req.user, productId, imageResult.url);
-
-    return {
-      message: 'Product photo uploaded successfully',
-      imageUrl: imageResult.url,
-    };
+  async uploadProductPhoto() {
+    throw new BadRequestException('Product photo upload temporarily disabled');
   }
 
   @Post('establishment-photo/:establishmentId')
   @Roles(RoleType.ADMIN, RoleType.PARTNER)
-  @UseInterceptors(FileInterceptor('image', multerConfig))
-  @ApiOperation({ summary: 'Upload establishment photo (Admin/Partner only)' })
-  @ApiConsumes('multipart/form-data')
-  @ApiParam({
-    name: 'establishmentId',
-    type: 'string',
-    description: 'Establishment ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Establishment photo uploaded successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Establishment photo uploaded successfully' },
-        imageUrl: { type: 'string', example: '/uploads/establishments/establishment-123-image.png' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid file format or file too large',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'User not authenticated',
-  })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'Insufficient permissions - Admin/Partner role required',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Establishment not found',
-  })
-  async uploadEstablishmentPhoto(
-    @Param('establishmentId') establishmentId: string,
-    @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
-  ) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
-
-    // Verify establishment exists using existing method
-    const establishment = await this.salesService.obterDetalhesLoja(establishmentId);
-    if (!establishment) {
-      throw new NotFoundException('Establishment not found');
-    }
-
-    // Process and save the image
-    const imageResult = await this.imageService.processAndSaveImage(file, ImageType.ESTABLISHMENT, establishmentId);
-
-    // Update establishment with new image URL
-    await this.salesService.updateEstablishmentImage(req.user, establishmentId, imageResult.url);
-
-    return {
-      message: 'Establishment photo uploaded successfully',
-      imageUrl: imageResult.url,
-    };
+  async uploadEstablishmentPhoto() {
+    throw new BadRequestException('Establishment photo upload temporarily disabled');
   }
+  */
 }
+

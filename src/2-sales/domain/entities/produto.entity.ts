@@ -82,4 +82,11 @@ export class Produto extends BaseEntity {
     }
     this.estoque += quantidade;
   }
+
+  atualizarPreco(novoPreco: Dinheiro): void {
+    if (novoPreco.valor <= 0) {
+      throw new Error('Preço deve ser maior que zero');
+    }
+    this.preco = novoPreco.valor;
+  }
 }

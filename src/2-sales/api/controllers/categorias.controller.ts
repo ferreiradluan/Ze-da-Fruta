@@ -16,12 +16,13 @@ import { RolesGuard } from '../../../1-account-management/application/strategies
 import { Roles } from '../../../1-account-management/application/strategies/guards/roles.decorator';
 import { RoleType } from '../../../1-account-management/domain/enums/role-type.enum';
 import { SalesService } from '../../application/services/sales.service';
+import { CategoriaService } from '../../application/services/categoria.service';
 import { CreateCategoriaDto } from '../dto/create-categoria.dto';
 
 @ApiTags('👑 Admin - Categorias')
 @Controller('categorias')
 export class CategoriasController {
-  constructor(private readonly salesService: SalesService) {}
+  constructor(private readonly categoriaService: CategoriaService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -54,7 +55,7 @@ export class CategoriasController {
     description: 'Acesso negado - apenas administradores'
   })
   async listarCategorias() {
-    return this.salesService.listarCategorias();
+    return this.categoriaService.listarCategorias();
   }
 
   @Post()

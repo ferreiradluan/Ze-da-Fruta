@@ -4,6 +4,7 @@ import { StatusPedido } from '../enums/status-pedido.enum';
 import { ItemPedido } from './item-pedido.entity';
 import { Cupom } from './cupom.entity';
 import { Produto } from './produto.entity';
+import { Dinheiro } from '../value-objects/dinheiro.vo';
 
 @Entity('pedidos')
 export class Pedido extends BaseEntity {
@@ -13,7 +14,7 @@ export class Pedido extends BaseEntity {
   @Column({
     type: 'varchar',
     enum: StatusPedido,
-    default: StatusPedido.PENDENTE
+    default: StatusPedido.PAGAMENTO_PENDENTE
   })
   status: StatusPedido;
 
@@ -47,8 +48,21 @@ export class Pedido extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   cupomId: string | null = null;
 
+  // Métodos para trabalhar com Value Objects
+  getValorTotal(): Dinheiro {
+    return Dinheiro.criar(this.valorTotal);
+  }
+
+  getValorSubtotal(): Dinheiro {
+    return Dinheiro.criar(this.valorSubtotal);
+  }
+
+  getValorDesconto(): Dinheiro {
+    return Dinheiro.criar(this.valorDesconto);
+  }
+
   // Métodos de Negócio (Rich Domain Model)
-    adicionarItem(produto: Produto, quantidade: number): void {
+  adicionarItem(produto: Produto, quantidade: number): void {
     if (!produto.estaDisponivel()) {
       throw new Error(`Produto ${produto.nome} não está disponível`);
     }
@@ -148,15 +162,15 @@ export class Pedido extends BaseEntity {
   }
 
   confirmar(): void {
-    if (this.status !== StatusPedido.PENDENTE) {
-      throw new Error('Apenas pedidos pendentes podem ser confirmados');
+    if (this.status !== StatusPedido.PAGAMENTO_PENDENTE) {
+      throw new Error('Apenas pedidos com pagamento pendente podem ser confirmados');
     }
 
     if (this.itens.length === 0) {
       throw new Error('Não é possível confirmar um pedido sem itens');
     }
 
-    this.status = StatusPedido.EM_PREPARO;
+    this.status = StatusPedido.PAGO;
     
     // Usar o cupom se houver
     if (this.cupom) {
@@ -177,23 +191,23 @@ export class Pedido extends BaseEntity {
   }
 
   enviar(): void {
-    if (this.status !== StatusPedido.EM_PREPARO) {
-      throw new Error('Apenas pedidos em preparo podem ser enviados');
+    if (this.status !== StatusPedido.EM_PREPARACAO) {
+      throw new Error('Apenas pedidos em preparação podem ser enviados');
     }
 
-    this.status = StatusPedido.ENVIADO;
+    this.status = StatusPedido.AGUARDANDO_ENTREGADOR;
   }
 
   entregar(): void {
-    if (this.status !== StatusPedido.ENVIADO) {
-      throw new Error('Apenas pedidos enviados podem ser entregues');
+    if (this.status !== StatusPedido.AGUARDANDO_ENTREGADOR) {
+      throw new Error('Apenas pedidos aguardando entregador podem ser entregues');
     }
 
     this.status = StatusPedido.ENTREGUE;
   }
 
   podeSerEditado(): boolean {
-    return this.status === StatusPedido.PENDENTE;
+    return this.status === StatusPedido.PAGAMENTO_PENDENTE;
   }
 
   obterResumo(): any {

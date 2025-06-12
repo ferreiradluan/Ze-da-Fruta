@@ -1,5 +1,6 @@
 import { Entity, Column } from 'typeorm';
 import { BaseEntity } from '../../../common/core/base.entity';
+import { Dinheiro } from '../value-objects/dinheiro.vo';
 
 export enum TipoDesconto {
   PERCENTUAL = 'PERCENTUAL',
@@ -56,9 +57,19 @@ export class Cupom extends BaseEntity {
     );
   }
 
-  calcularDesconto(valorCompra: number): number {
+  calcularDesconto(valorCompra: number): number;
+  calcularDesconto(subtotal: Dinheiro): Dinheiro;
+  calcularDesconto(valor: number | Dinheiro): number | Dinheiro {
+    let valorCompra: number;
+    
+    if (valor instanceof Dinheiro) {
+      valorCompra = valor.valor;
+    } else {
+      valorCompra = valor;
+    }
+
     if (!this.podeSerAplicado(valorCompra)) {
-      return 0;
+      return valor instanceof Dinheiro ? Dinheiro.criar(0) : 0;
     }
 
     let desconto = 0;
@@ -75,7 +86,13 @@ export class Cupom extends BaseEntity {
     }
 
     // Desconto não pode ser maior que o valor da compra
-    return Math.min(desconto, valorCompra);
+    const descontoFinal = Math.min(desconto, valorCompra);
+    
+    return valor instanceof Dinheiro ? Dinheiro.criar(descontoFinal) : descontoFinal;
+  }
+
+  getValorDesconto(): Dinheiro {
+    return Dinheiro.criar(this.valor);
   }
 
   usar(): void {

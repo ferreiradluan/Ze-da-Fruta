@@ -21,6 +21,16 @@ export class PedidoRepository {
       relations: ['itens', 'itens.produto', 'cupom']
     });
   }
+
+  // Alias para compatibilidade com o diagrama
+  async findById(id: string): Promise<Pedido | null> {
+    return this.buscarPorId(id);
+  }
+
+  // Alias para compatibilidade com o diagrama
+  async save(pedido: Pedido): Promise<Pedido> {
+    return this.repository.save(pedido);
+  }
   async buscarPorUsuario(userId: string): Promise<Pedido[]> {
     return this.repository.find({
       where: { clienteId: userId },
