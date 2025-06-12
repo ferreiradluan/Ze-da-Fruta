@@ -1,0 +1,73 @@
+# Testes para os endpoints do Lojista
+# Step 4 - Event-Driven Architecture Implementation
+
+### 1. Login como Lojista (PARTNER)
+# Primeiro, precisamos fazer login para obter o token JWT
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "lojista@zefruta.com",
+  "password": "123456"
+}
+
+### 2. Listar todos os pedidos da loja
+# Usar o token obtido no login acima
+GET http://localhost:3000/lojista/pedidos
+Authorization: Bearer {{token}}
+
+### 3. Listar pedidos por status - EM_PREPARO
+GET http://localhost:3000/lojista/pedidos?status=EM_PREPARO
+Authorization: Bearer {{token}}
+
+### 4. Listar pedidos por status - PAGO
+GET http://localhost:3000/lojista/pedidos?status=PAGO
+Authorization: Bearer {{token}}
+
+### 5. Atualizar status de um pedido - PAGO para EM_PREPARO
+PATCH http://localhost:3000/lojista/pedidos/{{pedidoId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "EM_PREPARO"
+}
+
+### 6. Atualizar status de um pedido - EM_PREPARO para ENVIADO
+PATCH http://localhost:3000/lojista/pedidos/{{pedidoId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "ENVIADO"
+}
+
+### 7. Atualizar status de um pedido - ENVIADO para ENTREGUE
+PATCH http://localhost:3000/lojista/pedidos/{{pedidoId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "ENTREGUE"
+}
+
+### 8. Tentativa de transição inválida (deve falhar)
+PATCH http://localhost:3000/lojista/pedidos/{{pedidoId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "PAGAMENTO_PENDENTE"
+}
+
+### 9. Listar pedidos por status - ENTREGUE
+GET http://localhost:3000/lojista/pedidos?status=ENTREGUE
+Authorization: Bearer {{token}}
+
+### 10. Verificar acesso negado sem token (deve falhar)
+GET http://localhost:3000/lojista/pedidos
+
+### 11. Verificar acesso negado com role incorreto (deve falhar)
+# Usar token de USER ao invés de PARTNER
+GET http://localhost:3000/lojista/pedidos
+Authorization: Bearer {{user_token}}

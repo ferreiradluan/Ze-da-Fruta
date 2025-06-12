@@ -1,87 +1,57 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { join } from 'path';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { ProductsModule } from './products/products.module';
-import { CategoriesModule } from './categories/categories.module';
-import { PedidosModule } from './pedidos/pedidos.module';
-import { EntregasModule } from './entregas/entregas.module';
-import { EnderecosModule } from './enderecos/enderecos.module';
-import { EstabelecimentosModule } from './estabelecimentos/estabelecimentos.module';
-import { CuponsModule } from './cupons/cupons.module';
-import { PagamentosModule } from './pagamentos/pagamentos.module';
-import { ItensPedidoModule } from './itens-pedido/itens-pedido.module';
-import { UploadModule } from './upload/upload.module';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { AppController } from './app.controller';
-import { MemorySessionGuard } from './auth/guards/memory-session.guard';
-import { PerfilUsuarioModule } from './perfil-usuario/perfil-usuario.module';
-import { VendedorModule } from './vendedor/vendedor.module';
-import { EntregadorModule } from './entregador/entregador.module';
-import { MinhaContaController } from './auth/minha-conta.controller';
-import { AdminModule } from './admin/admin.module';
-import { AccountModule } from './account/account.module';
-import { SalesModule } from './sales/sales.module';
-import { DeliveryModule } from './delivery/delivery.module';
-import { PaymentModule } from './payment/payment.module';
-import { AdminDomainModule } from './admin-domain/admin-domain.module';
+import { CommonModule } from './common/common.module';
+import { AccountManagementModule } from './1-account-management/1-account-management.module';
+import { SalesModule } from './2-sales/2-sales.module';
+import { DeliveryModule } from './3-delivery/3-delivery.module';
+import { PaymentModule } from './4-payment/4-payment.module';
+import { AdminModule } from './5-admin/5-admin.module';
+import { SecurityConfig, getSecurityConfig } from './common/config/security.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
     }),
-    ThrottlerModule.forRoot([{
-      ttl: 60, // 1 minute
-      limit: 10, // 10 requests per minute
-    }]),
-    TypeOrmModule.forRoot({
-      type: 'better-sqlite3',
-      database: join(process.cwd(), 'database.sqlite'),
-      entities: [join(__dirname, '/**/*.entity{.ts,.js}')],
-      synchronize: true, // Habilita sincronização automática
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const securityConfig = getSecurityConfig(configService);
+        return [
+          {
+            ttl: securityConfig.rateLimiting.public.ttl * 1000, // Convert to ms
+            limit: securityConfig.rateLimiting.public.limit,
+            name: 'default',
+          },
+        ];
+      },
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/uploads',
-      exclude: ['/api*'],
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'sqlite',
+        database: configService.get<string>('DATABASE_PATH') || './ze_da_fruta.sqlite',
+        autoLoadEntities: true,
+        // ATENÇÃO: Ativar synchronize em produção TEMPORARIAMENTE para criar as tabelas
+        synchronize: true, // <-- Ativado para o primeiro deploy
+        logging: configService.get<string>('NODE_ENV') === 'development',
+      }),
     }),
-    // Módulos de autenticação primeiro
-    AuthModule,
-    AccountModule,
+    CommonModule,
+    AccountManagementModule,
     SalesModule,
     DeliveryModule,
     PaymentModule,
-    AdminDomainModule,
-    UsersModule,
-    // Demais módulos
-    ProductsModule,
-    CategoriesModule,
-    PedidosModule,
-    EntregasModule,
-    EnderecosModule,
-    EstabelecimentosModule,
-    CuponsModule,
-    PagamentosModule,
-    ItensPedidoModule,
-    UploadModule,
-    PerfilUsuarioModule,
-    VendedorModule,
-    EntregadorModule,
     AdminModule,
   ],
-  controllers: [AppController, MinhaContaController],
+  controllers: [],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: MemorySessionGuard,
-    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

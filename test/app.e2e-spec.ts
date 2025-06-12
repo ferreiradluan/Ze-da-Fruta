@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
+import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 
 describe('AppController (e2e)', () => {
@@ -23,7 +23,7 @@ describe('AppController (e2e)', () => {
   it('/ (GET) health check', () => {
     return request(app.getHttpServer())
       .get('/health')
-      .expect(200); // health endpoint agora existe
+      .expect(200);
   });
 
   it('/products (GET) deve retornar lista de produtos (público)', async () => {
@@ -40,6 +40,5 @@ describe('AppController (e2e)', () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  // Não é possível automatizar login Google, nem testar rotas protegidas sem token válido
   // Testes de rotas protegidas podem ser feitos manualmente ou mockando guards em testes unitários
 });
