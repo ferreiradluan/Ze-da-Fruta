@@ -48,4 +48,9 @@ export class PagamentoRepository {
   async buscarTodos(): Promise<Pagamento[]> {
     return this.repository.find({ order: { createdAt: 'DESC' } });
   }
+
+  // Método para compatibilidade com PaymentService
+  async findByPedidoId(pedidoId: string): Promise<Pagamento[]> {
+    return this.buscarPorPedidoId(pedidoId);
+  }
 }

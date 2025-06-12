@@ -8,7 +8,7 @@ export class SolicitacaoEntregadorDto {
   })
   @IsString()
   @IsNotEmpty()
-  nome: string;
+  nome!: string;
 
   @ApiProperty({
     description: 'E-mail do solicitante',
@@ -16,7 +16,7 @@ export class SolicitacaoEntregadorDto {
   })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Telefone com DDD',
@@ -24,7 +24,7 @@ export class SolicitacaoEntregadorDto {
   })
   @IsString()
   @IsNotEmpty()
-  telefone: string;
+  telefone!: string;
 
   @ApiProperty({
     description: 'CPF do solicitante (somente números)',
@@ -33,7 +33,7 @@ export class SolicitacaoEntregadorDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^\d{11}$/, { message: 'CPF deve conter exatamente 11 dígitos' })
-  cpf: string;
+  cpf!: string;
 
   @ApiProperty({
     description: 'Tipo de veículo utilizado para entregas',
@@ -45,7 +45,7 @@ export class SolicitacaoEntregadorDto {
   @IsIn(['moto', 'bicicleta', 'carro', 'a_pe'], { 
     message: 'Tipo de veículo deve ser: moto, bicicleta, carro ou a_pe' 
   })
-  tipoVeiculo: string;
+  tipoVeiculo!: string;
 
   @ApiProperty({
     description: 'Modelo do veículo',
@@ -53,7 +53,7 @@ export class SolicitacaoEntregadorDto {
   })
   @IsString()
   @IsNotEmpty()
-  modeloVeiculo: string;
+  modeloVeiculo!: string;
 
   @ApiProperty({
     description: 'Placa do veículo (formato ABC-1234)',
@@ -62,7 +62,7 @@ export class SolicitacaoEntregadorDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^[A-Z]{3}-\d{4}$/, { message: 'Placa deve estar no formato ABC-1234' })
-  placaVeiculo: string;
+  placaVeiculo!: string;
 
   @ApiProperty({
     description: 'Número da CNH',
@@ -71,7 +71,7 @@ export class SolicitacaoEntregadorDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^\d{11}$/, { message: 'Número da CNH deve conter exatamente 11 dígitos' })
-  numeroCNH: string;
+  numeroCNH!: string;
 
   @ApiProperty({
     description: 'Endereço residencial',
@@ -79,7 +79,7 @@ export class SolicitacaoEntregadorDto {
   })
   @IsString()
   @IsNotEmpty()
-  endereco: string;
+  endereco!: string;
 
   @ApiProperty({
     description: 'Número do endereço',
@@ -87,7 +87,7 @@ export class SolicitacaoEntregadorDto {
   })
   @IsString()
   @IsNotEmpty()
-  numeroEndereco: string;
+  numeroEndereco!: string;
 
   @ApiProperty({
     description: 'Complemento do endereço',
@@ -104,7 +104,7 @@ export class SolicitacaoEntregadorDto {
   })
   @IsString()
   @IsNotEmpty()
-  bairro: string;
+  bairro!: string;
 
   @ApiProperty({
     description: 'Cidade',
@@ -112,7 +112,7 @@ export class SolicitacaoEntregadorDto {
   })
   @IsString()
   @IsNotEmpty()
-  cidade: string;
+  cidade!: string;
 
   @ApiProperty({
     description: 'Estado (sigla)',
@@ -121,7 +121,7 @@ export class SolicitacaoEntregadorDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^[A-Z]{2}$/, { message: 'Estado deve ser uma sigla de 2 letras maiúsculas' })
-  estado: string;
+  estado!: string;
 
   @ApiProperty({
     description: 'CEP (somente números)',
@@ -130,7 +130,7 @@ export class SolicitacaoEntregadorDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^\d{8}$/, { message: 'CEP deve conter exatamente 8 dígitos' })
-  cep: string;
+  cep!: string;
 
   @ApiProperty({
     description: 'Observações adicionais',
