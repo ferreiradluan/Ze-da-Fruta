@@ -90,7 +90,7 @@ export class CategoriasController {
     description: 'Acesso negado - apenas administradores'
   })
   async criarCategoria(@Req() req, @Body(ValidationPipe) createCategoriaDto: CreateCategoriaDto) {
-    return this.salesService.criarCategoria(req.user, createCategoriaDto);
+    return this.categoriaService.criarCategoria(req.user, createCategoriaDto);
   }
 
   @Put(':id')
@@ -133,7 +133,7 @@ export class CategoriasController {
     @Param('id') id: string, 
     @Body(ValidationPipe) updateData: Partial<CreateCategoriaDto>
   ) {
-    return this.salesService.atualizarCategoria(req.user, id, updateData);
+    return this.categoriaService.atualizarCategoria(req.user, id, updateData);
   }
 
   @Delete(':id')
@@ -172,7 +172,7 @@ export class CategoriasController {
     description: 'Categoria não pode ser excluída - possui produtos associados'
   })
   async excluirCategoria(@Req() req, @Param('id') id: string) {
-    await this.salesService.excluirCategoria(req.user, id);
+    await this.categoriaService.excluirCategoria(req.user, id);
     return { message: 'Categoria excluída com sucesso' };
   }
 }

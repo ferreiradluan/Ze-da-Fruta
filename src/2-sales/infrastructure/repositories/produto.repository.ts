@@ -36,6 +36,17 @@ export class ProdutoRepository {
     });
   }
 
+  async findComEstoqueBaixo(limite: number = 10): Promise<Produto[]> {
+    return await this.repository.find({
+      where: {
+        ativo: true,
+        disponivel: true,
+      },
+      relations: ['estabelecimento'],
+      order: { estoque: 'ASC' },
+    }).then(produtos => produtos.filter(p => p.estoque <= limite));
+  }
+
   async findByCategoria(categoriaId: string): Promise<Produto[]> {
     return await this.repository
       .createQueryBuilder('produto')
@@ -74,14 +85,27 @@ export class ProdutoRepository {
     return await this.repository.count();
   }
 
-  async findComEstoqueBaixo(limite: number = 10): Promise<Produto[]> {
-    return await this.repository.find({
-      where: {
-        ativo: true,
-        disponivel: true,
-      },
-      relations: ['estabelecimento'],
-      order: { estoque: 'ASC' },
-    }).then(produtos => produtos.filter(p => p.estoque <= limite));
+  async findWithFilters(filtros: any): Promise<Produto[]> {
+    const queryBuilder = this.repository.createQueryBuilder('produto');
+    
+    queryBuilder.where('produto.ativo = :ativo', { ativo: true });
+    
+    if (filtros.estabelecimentoId) {
+      queryBuilder.andWhere('produto.estabelecimentoId = :estabelecimentoId', {
+        estabelecimentoId: filtros.estabelecimentoId
+      });
+    }
+    
+    if (filtros.categoria) {
+      queryBuilder
+        .innerJoin('produto.categorias', 'categoria')
+        .andWhere('categoria.nome ILIKE :categoria', { categoria: `%${filtros.categoria}%` });
+    }
+    
+    if (filtros.nome) {
+      queryBuilder.andWhere('produto.nome ILIKE :nome', { nome: `%${filtros.nome}%` });
+    }
+
+    return await queryBuilder.getMany();
   }
 }

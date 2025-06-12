@@ -7,86 +7,42 @@ import { Cupom } from '../../domain/entities/cupom.entity';
 export class CupomRepository {
   constructor(
     @InjectRepository(Cupom)
-    private readonly repository: Repository<Cupom>,
+    private readonly cupomRepository: Repository<Cupom>,
   ) {}
 
   async findById(id: string): Promise<Cupom | null> {
-    return await this.repository.findOne({
+    return await this.cupomRepository.findOne({
       where: { id },
     });
   }
 
   async findByCodigo(codigo: string): Promise<Cupom | null> {
-    return await this.repository.findOne({
+    return await this.cupomRepository.findOne({
       where: { codigo },
     });
   }
 
   async findAtivos(): Promise<Cupom[]> {
     const agora = new Date();
-    return await this.repository
+    return await this.cupomRepository
       .createQueryBuilder('cupom')
-      .where('cupom.ativo = true')
+      .where('cupom.ativo = :ativo', { ativo: true })
       .andWhere('cupom.dataValidade >= :agora', { agora })
-      .andWhere('cupom.vezesUsado < cupom.limitesUso')
-      .orderBy('cupom.dataValidade', 'ASC')
-      .getMany();
-  }
-
-  async findValidos(): Promise<Cupom[]> {
-    const agora = new Date();
-    return await this.repository
-      .createQueryBuilder('cupom')
-      .where('cupom.ativo = true')
-      .andWhere('cupom.dataValidade >= :agora', { agora })
-      .andWhere('cupom.vezesUsado < cupom.limitesUso')
-      .orderBy('cupom.dataValidade', 'ASC')
-      .getMany();
-  }
-
-  async findExpirandoEm(dias: number): Promise<Cupom[]> {
-    const dataLimite = new Date();
-    dataLimite.setDate(dataLimite.getDate() + dias);
-    
-    const agora = new Date();
-    
-    return await this.repository
-      .createQueryBuilder('cupom')
-      .where('cupom.ativo = true')
-      .andWhere('cupom.dataValidade >= :agora', { agora })
-      .andWhere('cupom.dataValidade <= :dataLimite', { dataLimite })
-      .andWhere('cupom.vezesUsado < cupom.limitesUso')
-      .orderBy('cupom.dataValidade', 'ASC')
       .getMany();
   }
 
   async save(cupom: Cupom): Promise<Cupom> {
-    return await this.repository.save(cupom);
-  }
-
-  async update(id: string, dados: Partial<Cupom>): Promise<void> {
-    await this.repository.update(id, dados);
+    return await this.cupomRepository.save(cupom);
   }
 
   async delete(id: string): Promise<void> {
-    await this.repository.update(id, { ativo: false });
+    await this.cupomRepository.delete(id);
   }
 
-  async incrementarUso(id: string): Promise<void> {
-    await this.repository.increment({ id }, 'vezesUsado', 1);
-  }
-
-  async count(): Promise<number> {
-    return await this.repository.count({ where: { ativo: true } });
-  }
-
-  async countValidos(): Promise<number> {
-    const agora = new Date();
-    return await this.repository
-      .createQueryBuilder('cupom')
-      .where('cupom.ativo = true')
-      .andWhere('cupom.dataValidade >= :agora', { agora })
-      .andWhere('cupom.vezesUsado < cupom.limitesUso')
-      .getCount();
+  async findByEstabelecimento(estabelecimentoId: string): Promise<Cupom[]> {
+    return await this.cupomRepository.find({
+      where: { estabelecimentoId },
+      order: { createdAt: 'DESC' }
+    });
   }
 }

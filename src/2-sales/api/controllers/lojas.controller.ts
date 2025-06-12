@@ -6,11 +6,15 @@ import { Roles } from '../../../1-account-management/application/strategies/guar
 import { RoleType } from '../../../1-account-management/domain/enums/role-type.enum';
 import { Public } from '../../../common/decorators/public.decorator';
 import { SalesService } from '../../application/services/sales.service';
+import { LojaService } from '../../application/services/loja.service';
 import { ListarProdutosDto } from '../dto/listar-produtos.dto';
 
 @Controller('sales/lojas')
 export class LojasController {
-  constructor(private readonly salesService: SalesService) {}
+  constructor(
+    private readonly salesService: SalesService,
+    private readonly lojaService: LojaService
+  ) {}
 
   // ===== ENDPOINTS PÚBLICOS =====
   @Get()
@@ -50,7 +54,7 @@ export class LojasController {
     }
   })
   async findAll() {
-    return this.salesService.listarLojas();
+    return this.lojaService.listarLojas();
   }
 
   @Get(':id')
@@ -90,7 +94,7 @@ export class LojasController {
     description: 'Loja não encontrada'
   })
   async findOne(@Param('id') id: string) {
-    return this.salesService.obterDetalhesLoja(id);
+    return this.lojaService.obterDetalhesLoja(id);
   }
 
   @Get(':id/produtos')
@@ -162,7 +166,7 @@ export class LojasController {
   })
   async produtosDaLojaCompleto(@Param('id') estabelecimentoId: string, @Query(ValidationPipe) filtros: ListarProdutosDto) {
     const filtrosComLoja = { ...filtros, estabelecimento: estabelecimentoId };
-    return this.salesService.buscarProdutosPublico(filtrosComLoja);
+    return this.lojaService.buscarProdutosPublico(filtrosComLoja);
   }
 
   // ===== ENDPOINTS PROTEGIDOS =====
@@ -227,6 +231,6 @@ export class LojasController {
   })
   async listarTodasLojas(@Req() req) {
     // Admin pode ver todas as lojas
-    return this.salesService.listarEstabelecimentosPublico();
+    return this.lojaService.listarEstabelecimentosPublico();
   }
 }

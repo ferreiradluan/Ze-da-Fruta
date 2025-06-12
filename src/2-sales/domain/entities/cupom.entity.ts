@@ -12,6 +12,9 @@ export class Cupom extends BaseEntity {
   @Column({ unique: true })
   codigo: string;
 
+  @Column({ nullable: true })
+  descricao: string;
+
   @Column({
     type: 'varchar',
     enum: TipoDesconto,
@@ -24,6 +27,9 @@ export class Cupom extends BaseEntity {
 
   @Column()
   dataValidade: Date;
+
+  @Column({ nullable: true })
+  dataVencimento: Date; // Alias para dataValidade para compatibilidade
 
   @Column({ default: true })
   ativo: boolean;
@@ -39,6 +45,9 @@ export class Cupom extends BaseEntity {
 
   @Column({ default: 0 })
   vezesUsado: number;
+
+  @Column({ nullable: true })
+  estabelecimentoId: string;
 
   // Métodos de Negócio
   estaValido(): boolean {

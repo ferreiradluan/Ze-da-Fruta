@@ -58,6 +58,22 @@ export class PedidoRepository {
       .getMany();
   }
 
+  async findByEstabelecimento(estabelecimentoId: string): Promise<Pedido[]> {
+    return await this.repository.find({
+      where: { estabelecimentoId },
+      relations: ['itens', 'cupom'],
+      order: { createdAt: 'DESC' }
+    });
+  }
+
+  async findByEstabelecimentoAndStatus(estabelecimentoId: string, status: any): Promise<Pedido[]> {
+    return await this.repository.find({
+      where: { estabelecimentoId, status },
+      relations: ['itens', 'cupom'],
+      order: { createdAt: 'DESC' }
+    });
+  }
+
   async atualizar(pedido: Pedido): Promise<Pedido> {
     return this.repository.save(pedido);
   }

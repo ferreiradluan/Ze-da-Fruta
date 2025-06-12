@@ -75,4 +75,17 @@ export class EstabelecimentoRepository {
       } 
     });
   }
+
+  async findByUsuario(usuarioId: string): Promise<Estabelecimento | null> {
+    return await this.repository.findOne({
+      where: { usuarioId }
+    });
+  }
+
+  async findPublic(): Promise<Estabelecimento[]> {
+    return await this.repository.find({
+      where: { ativo: true },
+      order: { nome: 'ASC' }
+    });
+  }
 }
