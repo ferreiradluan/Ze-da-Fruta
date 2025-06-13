@@ -2,19 +2,47 @@ import { Entity, Column } from 'typeorm';
 import { BaseEntity } from '../../../common/core/base.entity';
 import * as bcrypt from 'bcrypt';
 
-@Entity()
+@Entity('admins')
 export class Admin extends BaseEntity {
-  @Column()
+  @Column({ type: 'varchar' })
   nome: string;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true })
   email: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   senhaHash: string;
 
-  // Método de negócio conforme diagrama
-  verificarSenha(senha: string): boolean {
-    return bcrypt.compareSync(senha, this.senhaHash);
+  @Column({ type: 'varchar', default: 'ATIVO' })
+  status: string; // 'ATIVO' | 'INATIVO'
+
+  @Column({ type: 'timestamp', nullable: true })
+  ultimoLogin?: Date;
+
+  // === MÉTODOS DE DOMÍNIO RICO ===
+
+  async verificarSenha(senha: string): Promise<boolean> {
+    return bcrypt.compare(senha, this.senhaHash);
+  }
+
+  async definirSenha(novaSenha: string): Promise<void> {
+    const saltRounds = 12;
+    this.senhaHash = await bcrypt.hash(novaSenha, saltRounds);
+  }
+
+  desativar(): void {
+    this.status = 'INATIVO';
+  }
+
+  ativar(): void {
+    this.status = 'ATIVO';
+  }
+
+  isAtivo(): boolean {
+    return this.status === 'ATIVO';
+  }
+
+  registrarLogin(): void {
+    this.ultimoLogin = new Date();
   }
 }

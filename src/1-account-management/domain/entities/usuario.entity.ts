@@ -1,60 +1,93 @@
-import { Entity, Column, ManyToMany, JoinTable, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToMany, OneToMany, OneToOne, JoinTable, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../../common/core/base.entity';
 import { Role } from './role.entity';
 import { Endereco } from './endereco.entity';
 import { PerfilUsuario } from './perfil-usuario.entity';
-import { BusinessRuleViolationException } from '../../../common/exceptions/business-rule-violation.exception';
 
-@Entity()
+@Entity('usuarios')
 export class Usuario extends BaseEntity {
-  @Column()
+  @Column({ type: 'varchar' })
   nome: string;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true })
   email: string;
 
-  @Column({ type: 'text', default: 'ATIVO' })
-  status: string;
+  @Column({ type: 'varchar', default: 'ATIVO' })
+  status: string; // 'ATIVO' | 'INATIVO' | 'SUSPENSO'
 
   // Agregação: Roles existem independentemente do Usuário
   @ManyToMany(() => Role, { cascade: true })
-  @JoinTable()
+  @JoinTable({
+    name: 'usuario_roles',
+    joinColumn: { name: 'usuario_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' }
+  })
   roles: Role[];
 
   // Composição: Endereços pertencem ao Usuário
-  @OneToMany(() => Endereco, (endereco) => endereco.usuario, { cascade: true })
+  @OneToMany(() => Endereco, (endereco) => endereco.usuario, { 
+    cascade: true,
+    eager: false 
+  })
   enderecos: Endereco[];
 
   // Composição: Perfil é parte do Usuário (1:1)
-  @OneToOne(() => PerfilUsuario, (perfil) => perfil.usuario, { cascade: true })
-  @JoinColumn()
-  perfil: PerfilUsuario;
-  // Métodos de negócio conforme diagrama
+  @OneToOne(() => PerfilUsuario, (perfil) => perfil.usuario, { 
+    cascade: true,
+    eager: false 
+  })
+  perfil: PerfilUsuario;  // === MÉTODOS DE DOMÍNIO RICO ===
+  
   desativar(): void {
-    if (this.status !== 'ATIVO') {
-      throw new BusinessRuleViolationException('Usuário já está inativo.');
-    }
     this.status = 'INATIVO';
   }
 
-  adicionarEndereco(dadosEndereco: any): void {
-    if (!this.enderecos) this.enderecos = [];
-    const endereco = new Endereco();
-    Object.assign(endereco, dadosEndereco);
+  ativar(): void {
+    this.status = 'ATIVO';
+  }
+
+  suspender(): void {
+    this.status = 'SUSPENSO';
+  }
+
+  isAtivo(): boolean {
+    return this.status === 'ATIVO';
+  }
+
+  isSuspenso(): boolean {
+    return this.status === 'SUSPENSO';
+  }
+
+  adicionarEndereco(endereco: Endereco): void {
+    if (!this.enderecos) {
+      this.enderecos = [];
+    }
     endereco.usuario = this;
     this.enderecos.push(endereco);
   }
 
   removerEndereco(enderecoId: string): void {
-    if (!this.enderecos) return;
-    this.enderecos = this.enderecos.filter(endereco => endereco.id !== enderecoId);
+    if (this.enderecos) {
+      this.enderecos = this.enderecos.filter(e => e.id !== enderecoId);
+    }
   }
 
   adicionarRole(role: Role): void {
-    if (!this.roles) this.roles = [];
-    if (this.roles.find((r) => r.id === role.id)) {
-      return; // Role já existe
+    if (!this.roles) {
+      this.roles = [];
     }
-    this.roles.push(role);
+    if (!this.roles.find(r => r.id === role.id)) {
+      this.roles.push(role);
+    }
+  }
+
+  removeRole(roleName: string): void {
+    if (this.roles) {
+      this.roles = this.roles.filter(r => r.nome !== roleName);
+    }
+  }
+
+  hasRole(roleName: string): boolean {
+    return this.roles?.some(r => r.nome === roleName) || false;
   }
 }
