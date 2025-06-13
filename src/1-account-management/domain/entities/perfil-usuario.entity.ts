@@ -33,10 +33,8 @@ export class PerfilUsuario extends BaseEntity {
 
   @Column({ type: 'boolean', default: false })
   documentoVerificado: boolean;
-
   // Composição: Perfil é parte do Usuário (1:1)
   @OneToOne(() => Usuario, (usuario) => usuario.perfil, { onDelete: 'CASCADE' })
-  @JoinColumn()
   usuario: Usuario;
 
   // === MÉTODOS DE DOMÍNIO RICO ===

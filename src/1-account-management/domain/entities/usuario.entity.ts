@@ -30,13 +30,15 @@ export class Usuario extends BaseEntity {
     eager: false 
   })
   enderecos: Endereco[];
-
   // Composição: Perfil é parte do Usuário (1:1)
   @OneToOne(() => PerfilUsuario, (perfil) => perfil.usuario, { 
     cascade: true,
     eager: false 
   })
-  perfil: PerfilUsuario;  // === MÉTODOS DE DOMÍNIO RICO ===
+  @JoinColumn()  // ✅ Adicionar JoinColumn aqui
+  perfil: PerfilUsuario;
+
+  // === MÉTODOS DE DOMÍNIO RICO ===
   
   desativar(): void {
     this.status = 'INATIVO';
