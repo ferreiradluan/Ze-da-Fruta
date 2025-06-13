@@ -1,16 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-// Controllers da Camada de API
-import { AuthController } from './api/controllers/auth.controller';
-import { AccountController } from './api/controllers/account.controller';
-import { PartnerOnboardingController } from './api/controllers/partner-onboarding.controller';
-
-// Services da Camada de Lógica de Negócio
-import { AuthService } from './application/services/auth.service';
-import { AccountService } from './application/services/account.service';
-import { PartnerOnboardingService } from './application/services/partner-onboarding.service';
-
 // Entidades do Domínio
 import { Usuario } from './domain/entities/usuario.entity';
 import { Admin } from './domain/entities/admin.entity';
@@ -19,12 +9,22 @@ import { Endereco } from './domain/entities/endereco.entity';
 import { PerfilUsuario } from './domain/entities/perfil-usuario.entity';
 import { SolicitacaoParceiro } from './domain/entities/solicitacao-parceiro.entity';
 
-// Repositories da Camada de Acesso a Dados
+// Controllers
+import { AuthController } from './api/controllers/auth.controller';
+import { AccountController } from './api/controllers/account.controller';
+import { PartnerOnboardingController } from './api/controllers/partner-onboarding.controller';
+
+// Services
+import { AuthService } from './application/services/auth.service';
+import { AccountService } from './application/services/account.service';
+import { PartnerOnboardingService } from './application/services/partner-onboarding.service';
+
+// Repositories
 import { UsuarioRepository } from './infrastructure/repositories/usuario.repository';
 import { AdminRepository } from './infrastructure/repositories/admin.repository';
 import { SolicitacaoParceiroRepository } from './infrastructure/repositories/solicitacao-parceiro.repository';
 
-// Strategies e Guards (mantidos para funcionalidade)
+// Strategies e Guards
 import { GoogleStrategy } from './application/strategies/google.strategy';
 import { JwtStrategy } from './application/strategies/jwt.strategy';
 import { GoogleAuthGuard } from './application/strategies/google-auth.guard';
@@ -50,23 +50,27 @@ import { EventBusModule } from '../common/event-bus';
     PartnerOnboardingController
   ],
   providers: [
+    // Services
     AuthService,
     AccountService,
     PartnerOnboardingService,
+    
+    // Repositories
     UsuarioRepository,
     AdminRepository,
     SolicitacaoParceiroRepository,
+    
+    // Strategies
     GoogleStrategy,
     JwtStrategy,
     GoogleAuthGuard,
   ],
   exports: [
-    AuthService, 
-    AccountService, 
+    AuthService,
+    AccountService,
     PartnerOnboardingService,
     UsuarioRepository,
     AdminRepository,
-    SolicitacaoParceiroRepository,
   ],
 })
 export class AccountManagementModule {}
