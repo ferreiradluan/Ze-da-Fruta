@@ -17,6 +17,23 @@
 
 ---
 
+## 🌐 Deploy em Produção
+
+<div align="center">
+
+### 🚀 **Aplicação Online**
+**API Backend:** [https://meu-ze-da-fruta-backend-8c4976f28553.herokuapp.com](https://meu-ze-da-fruta-backend-8c4976f28553.herokuapp.com)
+
+### 📚 **Documentação Swagger**
+**Interface Interativa:** [https://meu-ze-da-fruta-backend-8c4976f28553.herokuapp.com/api#/](https://meu-ze-da-fruta-backend-8c4976f28553.herokuapp.com/api#/)
+
+![Heroku](https://img.shields.io/badge/Heroku-Deployed-purple)
+![API Status](https://img.shields.io/badge/API-Online-brightgreen)
+
+</div>
+
+---
+
 ## 📋 Sobre o Projeto
 
 O **Ze da Fruta** é uma plataforma completa de delivery de hortifrúti que conecta consumidores, parceiros comerciais e administradores em um ecossistema digital robusto. O backend foi desenvolvido utilizando as melhores práticas de arquitetura de software, oferecendo uma API RESTful escalável e segura.
@@ -245,7 +262,7 @@ npm run test:cov
         <br />
         <sub><b>Tiago Schulz</b></sub>
         <br />
-        <sub>UC23200XXX</sub>
+        <sub>UC23200154</sub>
       </a>
     </td>
     <td align="center">
@@ -254,7 +271,7 @@ npm run test:cov
         <br />
         <sub><b>Victor Davidson</b></sub>
         <br />
-        <sub>UC23200XXX</sub>
+        <sub>UC23201064</sub>
       </a>
     </td>
   </tr>
@@ -270,7 +287,7 @@ Este projeto está licenciado sob a **MIT License**. Consulte o arquivo [LICENSE
 
 ## 📞 Suporte
 
-- 📧 **Email**: suporte@zedafruta.com
+- 📧 **Email**: luanhsouzaf@gmail.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/ferreiradluan/Ze-da-Fruta/issues)
 - 📖 **Wiki**: [Documentação Completa](https://github.com/ferreiradluan/Ze-da-Fruta/wiki)
 
