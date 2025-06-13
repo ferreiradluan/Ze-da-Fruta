@@ -3,17 +3,18 @@ import { BaseEntity } from '../../../common/core/base.entity';
 import * as bcrypt from 'bcrypt';
 
 @Entity()
-export class Admin extends BaseEntity {  @Column({ unique: true })
-  email: string;
+export class Admin extends BaseEntity {
   @Column()
   nome: string;
-  @Column({ type: 'text', nullable: true })
-  fotoPerfil: string | null; // URL/caminho da foto de perfil
+
+  @Column({ unique: true })
+  email: string;
 
   @Column()
   senhaHash: string;
 
-  async verificarSenha(senhaFornecida: string): Promise<boolean> {
-    return bcrypt.compare(senhaFornecida, this.senhaHash);
+  // Método de negócio conforme diagrama
+  verificarSenha(senha: string): boolean {
+    return bcrypt.compareSync(senha, this.senhaHash);
   }
 }

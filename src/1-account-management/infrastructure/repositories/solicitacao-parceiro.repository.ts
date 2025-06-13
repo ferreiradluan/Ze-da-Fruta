@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SolicitacaoParceiro } from '../../domain/entities/solicitacao-parceiro.entity';
-import { StatusSolicitacao } from '../../domain/enums/status-solicitacao.enum';
-import { TipoSolicitacao } from '../../domain/enums/tipo-solicitacao.enum';
 
 @Injectable()
 export class SolicitacaoParceiroRepository {
@@ -32,21 +30,21 @@ export class SolicitacaoParceiroRepository {
     return this.repository.findOne({ where: { cnpj } });
   }
 
-  async buscarPorStatus(status: StatusSolicitacao): Promise<SolicitacaoParceiro[]> {
+  async buscarPorStatus(status: string): Promise<SolicitacaoParceiro[]> {
     return this.repository.find({ 
       where: { status },
       order: { createdAt: 'DESC' }
     });
   }
 
-  async buscarPorTipo(tipo: TipoSolicitacao): Promise<SolicitacaoParceiro[]> {
+  async buscarPorTipo(tipo: string): Promise<SolicitacaoParceiro[]> {
     return this.repository.find({ 
       where: { tipo },
       order: { createdAt: 'DESC' }
     });
   }
 
-  async buscarPorTipoEStatus(tipo: TipoSolicitacao, status: StatusSolicitacao): Promise<SolicitacaoParceiro[]> {
+  async buscarPorTipoEStatus(tipo: string, status: string): Promise<SolicitacaoParceiro[]> {
     return this.repository.find({ 
       where: { tipo, status },
       order: { createdAt: 'DESC' }
@@ -67,11 +65,11 @@ export class SolicitacaoParceiroRepository {
     return this.repository.count();
   }
 
-  async contarPorStatus(status: StatusSolicitacao): Promise<number> {
+  async contarPorStatus(status: string): Promise<number> {
     return this.repository.count({ where: { status } });
   }
 
-  async contarPorTipo(tipo: TipoSolicitacao): Promise<number> {
+  async contarPorTipo(tipo: string): Promise<number> {
     return this.repository.count({ where: { tipo } });
   }
 
