@@ -5,6 +5,7 @@ import { RolesGuard } from '../../../1-account-management/application/strategies
 import { Roles } from '../../../1-account-management/application/strategies/guards/roles.decorator';
 import { RoleType } from '../../../1-account-management/domain/enums/role-type.enum';
 import { SalesService } from '../../application/services/sales.service';
+import { CupomService } from '../../application/services/cupom.service';
 import { CreateCupomDto, UpdateCupomDto } from '../dto/create-cupom.dto';
 
 @ApiTags('🎫 Admin - Cupons')
@@ -12,7 +13,7 @@ import { CreateCupomDto, UpdateCupomDto } from '../dto/create-cupom.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth('JWT-auth')
 export class CuponsController {
-  constructor(private readonly salesService: SalesService) {}
+  constructor(private readonly cupomService: CupomService) {}
 
   @Post()
   @Roles(RoleType.ADMIN)
@@ -37,7 +38,7 @@ export class CuponsController {
     description: 'Acesso negado - apenas administradores'
   })
   async criarCupom(@Req() req, @Body() createCupomDto: CreateCupomDto) {
-    return this.salesService.criarCupom(req.user, createCupomDto);
+    return this.cupomService.criarCupom(req.user, createCupomDto);
   }
 
   @Get()
@@ -51,7 +52,7 @@ export class CuponsController {
     description: 'Lista de cupons retornada com sucesso'
   })
   async listarCupons(@Req() req) {
-    return this.salesService.listarCupons(req.user);
+    return this.cupomService.listarCupons(req.user);
   }
 
   @Get(':codigo')
@@ -74,7 +75,7 @@ export class CuponsController {
     description: 'Cupom não encontrado'
   })
   async buscarCupom(@Param('codigo') codigo: string) {
-    return this.salesService.buscarCupomPorCodigo(codigo);
+    return this.cupomService.buscarCupomPorCodigo(codigo);
   }
 
   @Patch(':id')
@@ -105,7 +106,7 @@ export class CuponsController {
     description: 'Acesso negado - apenas administradores'
   })
   async atualizarCupom(@Req() req, @Param('id') id: string, @Body() updateCupomDto: UpdateCupomDto) {
-    return this.salesService.atualizarCupom(req.user, id, updateCupomDto);
+    return this.cupomService.atualizarCupom(req.user, id, updateCupomDto);
   }
 
   @Patch(':id/desativar')
@@ -132,7 +133,7 @@ export class CuponsController {
     description: 'Acesso negado - apenas administradores'
   })
   async desativarCupom(@Req() req, @Param('id') id: string) {
-    return this.salesService.desativarCupom(req.user, id);
+    return this.cupomService.desativarCupom(req.user, id);
   }
 
   @Post('validar')
@@ -180,6 +181,6 @@ export class CuponsController {
     }
   })
   async validarCupom(@Body() body: { codigo: string; valorPedido: number }) {
-    return this.salesService.validarCupom(body.codigo, body.valorPedido);
+    return this.cupomService.validarCupom(body.codigo, body.valorPedido);
   }
 }

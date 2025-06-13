@@ -6,7 +6,7 @@ export class UpdatePedidoDto {
   @ApiPropertyOptional({
     description: 'Novo status do pedido',
     enum: StatusPedido,
-    example: StatusPedido.EM_PREPARO
+    example: StatusPedido.EM_PREPARACAO
   })
   @IsOptional()
   @IsEnum(StatusPedido)
