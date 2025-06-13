@@ -18,24 +18,26 @@ export class PerfilUsuario extends BaseEntity {
 
   @Column({ type: 'varchar', nullable: true })
   genero?: string; // 'M' | 'F' | 'OUTRO' | 'NAO_INFORMADO'
-
   @Column({ type: 'text', nullable: true })
   bio?: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  fotoPerfil?: string;
+
   @Column({ type: 'varchar', default: 'INCOMPLETO' })
-  statusPerfil: string; // 'COMPLETO' | 'INCOMPLETO' | 'VERIFICADO'
+  statusPerfil!: string; // 'COMPLETO' | 'INCOMPLETO' | 'VERIFICADO'
 
   @Column({ type: 'boolean', default: false })
-  emailVerificado: boolean;
+  emailVerificado!: boolean;
 
   @Column({ type: 'boolean', default: false })
-  telefoneVerificado: boolean;
+  telefoneVerificado!: boolean;
 
   @Column({ type: 'boolean', default: false })
-  documentoVerificado: boolean;
+  documentoVerificado!: boolean;
   // Composição: Perfil é parte do Usuário (1:1)
   @OneToOne(() => Usuario, (usuario) => usuario.perfil, { onDelete: 'CASCADE' })
-  usuario: Usuario;
+  usuario!: Usuario;
 
   // === MÉTODOS DE DOMÍNIO RICO ===
 

@@ -4,44 +4,44 @@ import { Usuario } from './usuario.entity';
 
 @Entity('enderecos')
 export class Endereco extends BaseEntity {
-  @Column({ type: 'varchar' })
-  apelido: string;
+  @Column({ type: 'varchar', length: 100 })
+  apelido!: string;
 
-  @Column({ type: 'varchar' })
-  rua: string;
+  @Column({ type: 'varchar', length: 255 })
+  rua!: string;
 
-  @Column({ type: 'varchar' })
-  numero: string;
+  @Column({ type: 'varchar', length: 20 })
+  numero!: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   complemento?: string;
 
-  @Column({ type: 'varchar' })
-  bairro: string;
+  @Column({ type: 'varchar', length: 100 })
+  bairro!: string;
 
-  @Column({ type: 'varchar' })
-  cidade: string;
+  @Column({ type: 'varchar', length: 100 })
+  cidade!: string;
 
-  @Column({ type: 'varchar' })
-  estado: string;
+  @Column({ type: 'varchar', length: 2 })
+  estado!: string;
 
-  @Column({ type: 'varchar' })
-  cep: string;
+  @Column({ type: 'varchar', length: 8 })
+  cep!: string;
 
-  @Column({ type: 'decimal', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
   latitude?: number;
 
-  @Column({ type: 'decimal', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
   longitude?: number;
 
   @Column({ type: 'boolean', default: false })
-  principal: boolean;
+  principal!: boolean;
 
   @Column({ type: 'boolean', default: true })
-  ativo: boolean;
+  ativo!: boolean;
 
   @ManyToOne(() => Usuario, (usuario) => usuario.enderecos, { onDelete: 'CASCADE' })
-  usuario: Usuario;
+  usuario!: Usuario;
 
   // === MÉTODOS DE DOMÍNIO RICO ===
   definirComoPrincipal(): void {
@@ -55,8 +55,12 @@ export class Endereco extends BaseEntity {
   isPrincipal(): boolean {
     return this.principal;
   }
-
   isAtivo(): boolean {
     return this.ativo;
+  }
+
+  getEnderecoCompleto(): string {
+    const complementoStr = this.complemento ? `, ${this.complemento}` : '';
+    return `${this.rua}, ${this.numero}${complementoStr}, ${this.bairro}, ${this.cidade}/${this.estado} - CEP: ${this.cep}`;
   }
 }

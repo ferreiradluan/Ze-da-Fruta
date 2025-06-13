@@ -7,14 +7,14 @@ export class CreateAdminDto {
     example: 'Admin Sistema'
   })
   @IsString()
-  nome: string;
+  nome!: string;
 
   @ApiProperty({
     description: 'E-mail do administrador',
     example: 'admin@sistema.com'
   })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Senha do administrador',
@@ -23,7 +23,7 @@ export class CreateAdminDto {
   })
   @IsString()
   @MinLength(8, { message: 'Senha deve ter pelo menos 8 caracteres' })
-  senha: string;
+  senha!: string;
 
   @ApiProperty({
     description: 'Status do administrador',

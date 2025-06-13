@@ -7,12 +7,12 @@ import { Admin } from './domain/entities/admin.entity';
 import { Role } from './domain/entities/role.entity';
 import { Endereco } from './domain/entities/endereco.entity';
 import { PerfilUsuario } from './domain/entities/perfil-usuario.entity';
-import { SolicitacaoParceiroNew } from './domain/entities/solicitacao-parceiro-new.entity';
+import { SolicitacaoParceiro } from './domain/entities/solicitacao-parceiro.entity';
 
 // Controllers
 import { AuthController } from './api/controllers/auth.controller';
 import { AccountController } from './api/controllers/account.controller';
-import { PartnerOnboardingNewController } from './api/controllers/partner-onboarding-new.controller';
+import { PartnerOnboardingController } from './api/controllers/partner-onboarding.controller';
 
 // Services
 import { AuthService } from './application/services/auth.service';
@@ -22,7 +22,7 @@ import { PartnerOnboardingService } from './application/services/partner-onboard
 // Repositories
 import { UsuarioRepository } from './infrastructure/repositories/usuario.repository';
 import { AdminRepository } from './infrastructure/repositories/admin.repository';
-import { SolicitacaoParceiroNewRepository } from './infrastructure/repositories/solicitacao-parceiro-new.repository';
+import { SolicitacaoParceiroRepository } from './infrastructure/repositories/solicitacao-parceiro.repository';
 import { EnderecoRepository } from './infrastructure/repositories/endereco.repository';
 
 // Strategies e Guards
@@ -41,14 +41,13 @@ import { EventBusModule } from '../common/event-bus';
       Role,
       Endereco,
       PerfilUsuario,
-      SolicitacaoParceiroNew  // ✅ Usar versão nova
+      SolicitacaoParceiro  // ✅ Usar versão corrigida
     ]),
     EventBusModule,
-  ],
-  controllers: [
+  ],  controllers: [
     AuthController, 
     AccountController, 
-    PartnerOnboardingNewController  // ✅ Registrar versão nova
+    PartnerOnboardingController  // ✅ Registrar versão corrigida
   ],
   providers: [
     // Services
@@ -59,7 +58,7 @@ import { EventBusModule } from '../common/event-bus';
     // Repositories
     UsuarioRepository,
     AdminRepository,
-    SolicitacaoParceiroNewRepository,  // ✅ Criar para nova entidade
+    SolicitacaoParceiroRepository,  // ✅ Repository para entidade corrigida
     EnderecoRepository,
     
     // Strategies

@@ -23,11 +23,15 @@ export class SolicitacaoParceiroRepository {
   }
 
   async buscarPorCpf(cpf: string): Promise<SolicitacaoParceiro | null> {
-    return this.repository.findOne({ where: { cpf } });
+    return this.repository.createQueryBuilder('solicitacao')
+      .where("JSON_EXTRACT(solicitacao.dados, '$.cpf') = :cpf", { cpf })
+      .getOne();
   }
 
   async buscarPorCnpj(cnpj: string): Promise<SolicitacaoParceiro | null> {
-    return this.repository.findOne({ where: { cnpj } });
+    return this.repository.createQueryBuilder('solicitacao')
+      .where("JSON_EXTRACT(solicitacao.dados, '$.cnpj') = :cnpj", { cnpj })
+      .getOne();
   }
 
   async buscarPorStatus(status: string): Promise<SolicitacaoParceiro[]> {
@@ -74,19 +78,15 @@ export class SolicitacaoParceiroRepository {
   }
 
   async verificarDuplicidade(email: string, cpf: string, cnpj?: string): Promise<boolean> {
-    const condicoes: any[] = [
-      { email },
-      { cpf }
-    ];
+    const query = this.repository.createQueryBuilder('solicitacao')
+      .where('solicitacao.email = :email', { email })
+      .orWhere("JSON_EXTRACT(solicitacao.dados, '$.cpf') = :cpf", { cpf });
 
     if (cnpj) {
-      condicoes.push({ cnpj });
+      query.orWhere("JSON_EXTRACT(solicitacao.dados, '$.cnpj') = :cnpj", { cnpj });
     }
 
-    const solicitacaoExistente = await this.repository.findOne({
-      where: condicoes
-    });
-
+    const solicitacaoExistente = await query.getOne();
     return !!solicitacaoExistente;
   }
 }

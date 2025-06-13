@@ -5,16 +5,16 @@ import { Usuario } from './usuario.entity';
 @Entity('roles')
 export class Role extends BaseEntity {
   @Column({ type: 'varchar', unique: true })
-  nome: string; // 'CLIENTE' | 'LOJISTA' | 'ENTREGADOR' | 'MODERADOR' | 'ADMIN'
+  nome!: string; // 'CLIENTE' | 'LOJISTA' | 'ENTREGADOR' | 'MODERADOR' | 'ADMIN'
 
   @Column({ type: 'text', nullable: true })
   descricao?: string;
 
   @Column({ type: 'boolean', default: true })
-  ativa: boolean;
+  ativa!: boolean;
 
   @ManyToMany(() => Usuario, (usuario) => usuario.roles)
-  usuarios: Usuario[];
+  usuarios!: Usuario[];
 
   // === MÉTODOS DE DOMÍNIO RICO ===
 

@@ -7,13 +7,13 @@ import { PerfilUsuario } from './perfil-usuario.entity';
 @Entity('usuarios')
 export class Usuario extends BaseEntity {
   @Column({ type: 'varchar' })
-  nome: string;
+  nome!: string;
 
   @Column({ type: 'varchar', unique: true })
-  email: string;
+  email!: string;
 
   @Column({ type: 'varchar', default: 'ATIVO' })
-  status: string; // 'ATIVO' | 'INATIVO' | 'SUSPENSO'
+  status!: string; // 'ATIVO' | 'INATIVO' | 'SUSPENSO'
 
   // Agregação: Roles existem independentemente do Usuário
   @ManyToMany(() => Role, { cascade: true })
@@ -22,21 +22,21 @@ export class Usuario extends BaseEntity {
     joinColumn: { name: 'usuario_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' }
   })
-  roles: Role[];
+  roles!: Role[];
 
   // Composição: Endereços pertencem ao Usuário
   @OneToMany(() => Endereco, (endereco) => endereco.usuario, { 
     cascade: true,
     eager: false 
   })
-  enderecos: Endereco[];
+  enderecos!: Endereco[];
   // Composição: Perfil é parte do Usuário (1:1)
   @OneToOne(() => PerfilUsuario, (perfil) => perfil.usuario, { 
     cascade: true,
     eager: false 
   })
   @JoinColumn()  // ✅ Adicionar JoinColumn aqui
-  perfil: PerfilUsuario;
+  perfil!: PerfilUsuario;
 
   // === MÉTODOS DE DOMÍNIO RICO ===
   

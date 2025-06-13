@@ -7,14 +7,14 @@ export class CreateUsuarioDto {
     example: 'João Silva'
   })
   @IsString()
-  nome: string;
+  nome!: string;
 
   @ApiProperty({
     description: 'E-mail do usuário',
     example: 'joao.silva@email.com'
   })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Status do usuário',

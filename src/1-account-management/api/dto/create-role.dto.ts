@@ -11,7 +11,7 @@ export class CreateRoleDto {
   @IsIn(['CLIENTE', 'LOJISTA', 'ENTREGADOR', 'MODERADOR', 'ADMIN'], {
     message: 'Nome deve ser: CLIENTE, LOJISTA, ENTREGADOR, MODERADOR ou ADMIN'
   })
-  nome: string;
+  nome!: string;
 
   @ApiProperty({
     description: 'Descrição da role',
@@ -20,7 +20,7 @@ export class CreateRoleDto {
   })
   @IsOptional()
   @IsString()
-  descricao?: string;
+  descricao?!: string;
 
   @ApiProperty({
     description: 'Se a role está ativa',

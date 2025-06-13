@@ -5,16 +5,16 @@ import * as bcrypt from 'bcrypt';
 @Entity('admins')
 export class Admin extends BaseEntity {
   @Column({ type: 'varchar' })
-  nome: string;
+  nome!: string;
 
   @Column({ type: 'varchar', unique: true })
-  email: string;
+  email!: string;
 
   @Column({ type: 'varchar' })
-  senhaHash: string;
+  senhaHash!: string;
 
   @Column({ type: 'varchar', default: 'ATIVO' })
-  status: string; // 'ATIVO' | 'INATIVO'
+  status!: string; // 'ATIVO' | 'INATIVO'
 
   @Column({ type: 'timestamp', nullable: true })
   ultimoLogin?: Date;

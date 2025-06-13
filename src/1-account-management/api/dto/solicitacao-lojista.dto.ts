@@ -8,7 +8,7 @@ export class SolicitacaoLojistaDto {
   })
   @IsString()
   @IsNotEmpty()
-  nome: string;
+  nome!: string;
 
   @ApiProperty({
     description: 'E-mail do solicitante',
@@ -16,7 +16,7 @@ export class SolicitacaoLojistaDto {
   })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Telefone com DDD',
@@ -24,7 +24,7 @@ export class SolicitacaoLojistaDto {
   })
   @IsString()
   @IsNotEmpty()
-  telefone: string;
+  telefone!: string;
 
   @ApiProperty({
     description: 'CPF do solicitante (somente números)',
@@ -33,7 +33,7 @@ export class SolicitacaoLojistaDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^\d{11}$/, { message: 'CPF deve conter exatamente 11 dígitos' })
-  cpf: string;
+  cpf!: string;
 
   @ApiProperty({
     description: 'Nome do estabelecimento comercial',
@@ -41,7 +41,7 @@ export class SolicitacaoLojistaDto {
   })
   @IsString()
   @IsNotEmpty()
-  nomeEstabelecimento: string;
+  nomeEstabelecimento!: string;
 
   @ApiProperty({
     description: 'CNPJ do estabelecimento (somente números)',
@@ -50,7 +50,7 @@ export class SolicitacaoLojistaDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^\d{14}$/, { message: 'CNPJ deve conter exatamente 14 dígitos' })
-  cnpj: string;
+  cnpj!: string;
 
   @ApiProperty({
     description: 'Descrição do tipo de negócio',
@@ -59,7 +59,7 @@ export class SolicitacaoLojistaDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(10, { message: 'Descrição deve ter pelo menos 10 caracteres' })
-  descricaoNegocio: string;
+  descricaoNegocio!: string;
 
   @ApiProperty({
     description: 'Endereço do estabelecimento',
@@ -67,7 +67,7 @@ export class SolicitacaoLojistaDto {
   })
   @IsString()
   @IsNotEmpty()
-  endereco: string;
+  endereco!: string;
 
   @ApiProperty({
     description: 'Número do endereço',
@@ -75,7 +75,7 @@ export class SolicitacaoLojistaDto {
   })
   @IsString()
   @IsNotEmpty()
-  numeroEndereco: string;
+  numeroEndereco!: string;
 
   @ApiProperty({
     description: 'Complemento do endereço',
@@ -84,7 +84,7 @@ export class SolicitacaoLojistaDto {
   })
   @IsOptional()
   @IsString()
-  complemento?: string;
+  complemento?!: string;
 
   @ApiProperty({
     description: 'Bairro',
@@ -92,7 +92,7 @@ export class SolicitacaoLojistaDto {
   })
   @IsString()
   @IsNotEmpty()
-  bairro: string;
+  bairro!: string;
 
   @ApiProperty({
     description: 'Cidade',
@@ -100,7 +100,7 @@ export class SolicitacaoLojistaDto {
   })
   @IsString()
   @IsNotEmpty()
-  cidade: string;
+  cidade!: string;
 
   @ApiProperty({
     description: 'Estado (sigla)',
@@ -109,7 +109,7 @@ export class SolicitacaoLojistaDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^[A-Z]{2}$/, { message: 'Estado deve ser uma sigla de 2 letras maiúsculas' })
-  estado: string;
+  estado!: string;
 
   @ApiProperty({
     description: 'CEP (somente números)',
@@ -118,7 +118,7 @@ export class SolicitacaoLojistaDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^\d{8}$/, { message: 'CEP deve conter exatamente 8 dígitos' })
-  cep: string;
+  cep!: string;
 
   @ApiProperty({
     description: 'Observações adicionais',
@@ -127,5 +127,5 @@ export class SolicitacaoLojistaDto {
   })
   @IsOptional()
   @IsString()
-  observacoes?: string;
+  observacoes?!: string;
 }
