@@ -1,69 +1,179 @@
-import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column } from 'typeorm';
 import { BaseEntity } from '../../../common/core/base.entity';
 import { StatusPagamento } from '../enums/status-pagamento.enum';
+import { Dinheiro } from '../value-objects/dinheiro.value-object';
 
+/**
+ * Entidade Pagamento - Modelo de Domínio Rico
+ *
+ * Responsabilidades:
+ * - Gerenciar o ciclo de vida do pagamento
+ * - Validar transições de estado
+ * - Encapsular regras de negócio de pagamento
+ */
 @Entity('pagamentos')
 export class Pagamento extends BaseEntity {
-  @Column()
-  pedidoId: string;
+  @Column({ type: 'varchar', length: 36 })
+  pedidoId!: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  valor: number;
+  private _valor!: number;
 
   @Column({
     type: 'varchar',
     enum: StatusPagamento,
     default: StatusPagamento.PENDENTE
   })
-  status: StatusPagamento;
+  status!: StatusPagamento;
 
-  @Column({ nullable: true })
-  stripeSessionId: string; // ID da sessão no Stripe
+  @Column({ type: 'varchar', default: 'stripe' })
+  provedor!: string;
 
-  @Column({ nullable: true })
-  stripePaymentIntentId: string; // ID do payment intent no Stripe
+  @Column({ type: 'varchar', nullable: true })
+  stripeSessionId?: string;
 
-  @Column({ nullable: true })
-  metodoPagamento: string; // card, pix, etc
+  @Column({ type: 'varchar', nullable: true })
+  stripePaymentIntentId?: string;
 
-  @Column({ nullable: true })
-  gatewayResponse: string; // JSON com resposta completa do gateway
+  @Column({ type: 'varchar', nullable: true })
+  metodoPagamento?: string;
 
-  @Column({ nullable: true })
-  dataProcessamento: Date;
+  @Column({ type: 'text', nullable: true })
+  gatewayResponse?: string;
 
-  @Column({ nullable: true })
-  motivoRecusa: string;
+  @Column({ type: 'timestamp', nullable: true })
+  dataProcessamento?: Date;
 
-  // Métodos de negócio
-  aprovar(): void {
+  @Column({ type: 'text', nullable: true })
+  motivoRecusa?: string;
+
+  // Getter para valor como Value Object
+  get valor(): Dinheiro {
+    return Dinheiro.criar(this._valor);
+  }
+
+  // Setter para valor
+  set valor(dinheiro: Dinheiro) {
+    this._valor = dinheiro.valor;
+  }
+
+  // ===================================
+  // MÉTODOS DE NEGÓCIO (DOMAIN RICH MODEL)
+  // ===================================
+
+  /**
+   * Confirma o pagamento
+   * Transição: PENDENTE → APROVADO
+   */
+  confirmar(): void {
     if (this.status !== StatusPagamento.PENDENTE) {
-      throw new Error('Apenas pagamentos pendentes podem ser aprovados');
+      throw new Error('Apenas pagamentos pendentes podem ser confirmados');
     }
+
     this.status = StatusPagamento.APROVADO;
     this.dataProcessamento = new Date();
   }
-  recusar(motivo?: string): void {
+
+  /**
+   * Falha o pagamento
+   * Transição: PENDENTE → RECUSADO
+   */
+  falhar(motivo: string): void {
     if (this.status !== StatusPagamento.PENDENTE) {
-      throw new Error('Apenas pagamentos pendentes podem ser recusados');
+      throw new Error('Apenas pagamentos pendentes podem falhar');
     }
+
     this.status = StatusPagamento.RECUSADO;
-    this.motivoRecusa = motivo || 'Motivo não informado';
+    this.motivoRecusa = motivo;
     this.dataProcessamento = new Date();
   }
 
-  estornar(): void {
+  /**
+   * Reembolsa o pagamento (total ou parcial)
+   * Transição: APROVADO → ESTORNADO | PARCIALMENTE_REEMBOLSADO
+   */
+  reembolsar(valorParcial?: Dinheiro): void {
     if (this.status !== StatusPagamento.APROVADO) {
-      throw new Error('Apenas pagamentos aprovados podem ser estornados');
+      throw new Error('Apenas pagamentos aprovados podem ser reembolsados');
     }
-    this.status = StatusPagamento.ESTORNADO;
+
+    if (valorParcial) {
+      if (valorParcial.valor >= this._valor) {
+        throw new Error('Valor do reembolso parcial não pode ser maior ou igual ao valor total');
+      }
+      this.status = StatusPagamento.PARCIALMENTE_REEMBOLSADO;
+    } else {
+      this.status = StatusPagamento.ESTORNADO;
+    }
+
+    this.dataProcessamento = new Date();
   }
 
+  /**
+   * Verifica se o pagamento está completo (aprovado)
+   */
+  estaCompleto(): boolean {
+    return this.status === StatusPagamento.APROVADO;
+  }
+
+  /**
+   * Verifica se o pagamento pode ser cancelado
+   */
+  podeSerCancelado(): boolean {
+    return this.status === StatusPagamento.PENDENTE;
+  }
+
+  /**
+   * Verifica se o pagamento pode ser reembolsado
+   */
+  podeSerReembolsado(): boolean {
+    return this.status === StatusPagamento.APROVADO ||
+      this.status === StatusPagamento.PARCIALMENTE_REEMBOLSADO;
+  }
+
+  /**
+   * Atualiza dados do gateway (Stripe)
+   */
+  atualizarDadosGateway(sessionId?: string, paymentIntentId?: string, metodoPagamento?: string, response?: any): void {
+    if (sessionId) {
+      this.stripeSessionId = sessionId;
+    }
+
+    if (paymentIntentId) {
+      this.stripePaymentIntentId = paymentIntentId;
+    }
+
+    if (metodoPagamento) {
+      this.metodoPagamento = metodoPagamento;
+    }
+
+    if (response) {
+      this.gatewayResponse = JSON.stringify(response);
+    }
+  }
+
+  // ===================================
+  // MÉTODOS ESTÁTICOS (FACTORY)
+  // ===================================
+
+  /**
+   * Factory method para criar um novo pagamento
+   */
   static criar(pedidoId: string, valor: number): Pagamento {
+    if (!pedidoId) {
+      throw new Error('ID do pedido é obrigatório');
+    }
+
+    if (valor <= 0) {
+      throw new Error('Valor deve ser maior que zero');
+    }
+
     const pagamento = new Pagamento();
     pagamento.pedidoId = pedidoId;
-    pagamento.valor = valor;
+    pagamento._valor = valor;
     pagamento.status = StatusPagamento.PENDENTE;
+    pagamento.provedor = 'stripe';
+
     return pagamento;
   }
 }

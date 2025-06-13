@@ -1,0 +1,628 @@
+@baseUrl = http://localhost:3000
+@authToken = your_auth_token_here
+
+### AUTENTICAÇÃO ###
+
+# Login Google (Cliente, Vendedor, Entregador)
+GET http://localhost:3000/auth/google
+
+# Login Local (apenas ADMIN)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@zedafruta.com",
+  "senha": "Zedafruta@2025"
+}
+
+# Trocar perfil ativo (usuário multi-perfil)
+PUT http://localhost:3000/auth/perfil-ativo
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "perfil": "vendedor"
+}
+
+# Deletar minha conta (qualquer usuário logado)
+DELETE http://localhost:3000/auth/minha-conta
+Authorization: Bearer {{authToken}}
+
+
+### PERFIL CLIENTE ###
+
+# Listar produtos
+GET http://localhost:3000/products
+
+# Buscar produto por nome
+GET http://localhost:3000/products/maçã
+
+# Criar pedido
+POST http://localhost:3000/pedidos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "usuarioId": 1,
+  "enderecoId": 1,
+  "itens": [
+    { "produtoId": 1, "quantidade": 2 }
+  ]
+}
+
+# Listar meus pedidos
+GET http://localhost:3000/pedidos?usuarioId=1
+Authorization: Bearer {{authToken}}
+
+# Avaliar produto
+PUT http://localhost:3000/products/maçã/rating
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "rating": 4.5
+}
+
+
+### PERFIL VENDEDOR ###
+
+# Criar produto
+POST http://localhost:3000/products
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "name": "Banana",
+  "description": "Banana prata",
+  "price": 3.99,
+  "weight": 1,
+  "unit": "kg",
+  "stockQuantity": 50,
+  "categoryId": 1
+}
+
+# Atualizar produto
+PUT http://localhost:3000/products/banana
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "price": 4.50
+}
+
+# Remover produto
+DELETE http://localhost:3000/products/banana
+Authorization: Bearer {{authToken}}
+
+# Listar meus pedidos recebidos
+GET http://localhost:3000/pedidos?vendedorId=1
+Authorization: Bearer {{authToken}}
+
+
+### PERFIL ENTREGADOR ###
+
+# Listar entregas disponíveis
+GET http://localhost:3000/entregas?status=AGUARDANDO_COLETA
+Authorization: Bearer {{authToken}}
+
+# Atualizar status da entrega
+PUT http://localhost:3000/entregas/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "status": "EM_TRANSITO"
+}
+
+# Finalizar entrega
+PUT http://localhost:3000/entregas/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "status": "ENTREGUE"
+}
+
+
+### PERFIL ADMIN ###
+
+# Login admin
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+{
+  "email": "admin@zedafruta.com",
+  "senha": "Zedafruta@2025"
+}
+
+# Dashboard
+GET http://localhost:3000/admin/dashboard
+Authorization: Bearer {{authToken}}
+
+# Listar usuários
+GET http://localhost:3000/admin/usuarios
+Authorization: Bearer {{authToken}}
+
+# Atualizar status de usuário
+PUT http://localhost:3000/admin/usuarios/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "status": "ATIVO"
+}
+
+# Listar estabelecimentos pendentes
+GET http://localhost:3000/admin/estabelecimentos/pendentes
+Authorization: Bearer {{authToken}}
+
+# Aprovar estabelecimento
+PUT http://localhost:3000/admin/estabelecimentos/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "status": "APROVADO"
+}
+
+# Listar entregadores pendentes
+GET http://localhost:3000/admin/entregadores/pendentes
+Authorization: Bearer {{authToken}}
+
+# Aprovar entregador
+PUT http://localhost:3000/admin/entregadores/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "status_aprovacao": "aprovado"
+}
+
+# Listar pedidos
+GET http://localhost:3000/admin/pedidos
+Authorization: Bearer {{authToken}}
+
+# Reembolsar pedido
+POST http://localhost:3000/admin/pedidos/1/reembolso
+Authorization: Bearer {{authToken}}
+
+# Relatório financeiro
+GET http://localhost:3000/admin/financeiro/relatorios
+Authorization: Bearer {{authToken}}
+
+# CRUD de cupons
+POST http://localhost:3000/admin/cupons
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "codigo": "PROMO10",
+  "desconto": 10,
+  "tipo": "PORCENTAGEM",
+  "validade": "2024-12-31"
+}
+GET http://localhost:3000/admin/cupons
+Authorization: Bearer {{authToken}}
+PUT http://localhost:3000/admin/cupons/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+{
+  "desconto": 15
+}
+DELETE http://localhost:3000/admin/cupons/1
+Authorization: Bearer {{authToken}}
+
+### User Management Endpoints ###
+
+# Obter usuário por ID
+# Requer autenticação
+GET {{baseUrl}}/users/1
+Authorization: Bearer {{authToken}}
+
+# Atualizar dados do usuário
+# Requer autenticação
+PUT {{baseUrl}}/users/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Novo Nome",
+  "lastName": "Novo Sobrenome",
+  "email": "novo@email.com"
+}
+
+# Remover usuário
+# Requer autenticação e permissão de ADMIN
+DELETE {{baseUrl}}/users/1
+Authorization: Bearer {{authToken}}
+
+### Product Management Endpoints ###
+
+# Criar novo produto
+# Requer autenticação e permissão de SELLER ou ADMIN
+POST {{baseUrl}}/products
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Maçã",
+  "description": "Maçã vermelha",
+  "price": 5.99,
+  "weight": 0.2,
+  "unit": "kg",
+  "stockQuantity": 100,
+  "categoryId": 1
+}
+
+# Listar todos os produtos
+# Público
+GET {{baseUrl}}/products
+
+# Listar produtos com filtros
+# Público - Suporta filtros por categoria, preço, status e busca por nome
+GET {{baseUrl}}/products?categoryId=1&isActive=true&minPrice=1&maxPrice=10&search=maçã
+
+# Buscar produto por nome
+# Público
+GET {{baseUrl}}/products/maçã
+
+# Atualizar produto
+# Requer autenticação e permissão de SELLER ou ADMIN
+PUT {{baseUrl}}/products/maçã
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "price": 6.99,
+  "stockQuantity": 150,
+  "description": "Maçã vermelha fresca"
+}
+
+# Remover produto
+# Requer autenticação e permissão de SELLER ou ADMIN
+DELETE {{baseUrl}}/products/maçã
+Authorization: Bearer {{authToken}}
+
+# Atualizar estoque do produto
+# Requer autenticação e permissão de SELLER ou ADMIN
+PUT {{baseUrl}}/products/maçã/stock
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "quantity": 50
+}
+
+# Atualizar avaliação do produto
+# Requer autenticação
+PUT {{baseUrl}}/products/maçã/rating
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "rating": 4.5
+}
+
+### Category Management Endpoints ###
+
+# Criar categoria
+# Requer autenticação e permissão de ADMIN
+POST {{baseUrl}}/categories
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Frutas",
+  "description": "Categoria de frutas"
+}
+
+# Listar todas as categorias
+# Público
+GET {{baseUrl}}/categories
+
+# Buscar categoria por nome
+# Público
+GET {{baseUrl}}/categories/frutas
+
+# Atualizar categoria
+# Requer autenticação e permissão de ADMIN
+PUT {{baseUrl}}/categories/frutas
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "description": "Categoria de frutas frescas"
+}
+
+# Remover categoria
+# Requer autenticação e permissão de ADMIN
+DELETE {{baseUrl}}/categories/frutas
+Authorization: Bearer {{authToken}}
+
+### Order Management Endpoints ###
+
+# Criar pedido
+# Requer autenticação
+POST {{baseUrl}}/pedidos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "usuarioId": 1,
+  "enderecoId": 1,
+  "itens": [
+    {
+      "produtoId": 1,
+      "quantidade": 2
+    }
+  ]
+}
+
+# Listar pedidos
+# Requer autenticação
+GET {{baseUrl}}/pedidos
+Authorization: Bearer {{authToken}}
+
+# Buscar pedido por ID
+# Requer autenticação
+GET {{baseUrl}}/pedidos/1
+Authorization: Bearer {{authToken}}
+
+# Atualizar status do pedido
+# Requer autenticação e permissão de SELLER ou ADMIN
+PUT {{baseUrl}}/pedidos/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "ENTREGUE"
+}
+
+# Remover pedido
+# Requer autenticação e permissão de ADMIN
+DELETE {{baseUrl}}/pedidos/1
+Authorization: Bearer {{authToken}}
+
+### Delivery Management Endpoints ###
+
+# Criar entrega
+# Requer autenticação e permissão de DELIVERY_PERSON ou ADMIN
+POST {{baseUrl}}/entregas
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "pedidoId": 1,
+  "entregadorId": 1,
+  "status": "EM_ANDAMENTO"
+}
+
+# Listar entregas
+# Requer autenticação
+GET {{baseUrl}}/entregas
+Authorization: Bearer {{authToken}}
+
+# Buscar entrega por ID
+# Requer autenticação
+GET {{baseUrl}}/entregas/1
+Authorization: Bearer {{authToken}}
+
+# Atualizar status da entrega
+# Requer autenticação e permissão de DELIVERY_PERSON ou ADMIN
+PUT {{baseUrl}}/entregas/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "ENTREGUE"
+}
+
+# Remover entrega
+# Requer autenticação e permissão de ADMIN
+DELETE {{baseUrl}}/entregas/1
+Authorization: Bearer {{authToken}}
+
+### Address Management Endpoints ###
+
+# Criar endereço
+# Requer autenticação
+POST {{baseUrl}}/enderecos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "rua": "Rua Exemplo",
+  "numero": "123",
+  "bairro": "Centro",
+  "cidade": "São Paulo",
+  "estado": "SP",
+  "cep": "01234-567"
+}
+
+# Listar endereços
+# Requer autenticação
+GET {{baseUrl}}/enderecos
+Authorization: Bearer {{authToken}}
+
+# Buscar endereço por ID
+# Requer autenticação
+GET {{baseUrl}}/enderecos/1
+Authorization: Bearer {{authToken}}
+
+# Atualizar endereço
+# Requer autenticação
+PUT {{baseUrl}}/enderecos/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "numero": "456",
+  "complemento": "Apto 101"
+}
+
+# Remover endereço
+# Requer autenticação
+DELETE {{baseUrl}}/enderecos/1
+Authorization: Bearer {{authToken}}
+
+### Establishment Management Endpoints ###
+
+# Criar estabelecimento
+# Requer autenticação e permissão de ADMIN
+POST {{baseUrl}}/estabelecimentos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "nome": "Frutaria Central",
+  "endereco": "Rua das Frutas, 123",
+  "telefone": "(11) 1234-5678"
+}
+
+# Listar estabelecimentos
+# Público
+GET {{baseUrl}}/estabelecimentos
+
+# Buscar estabelecimento por ID
+# Público
+GET {{baseUrl}}/estabelecimentos/1
+
+# Atualizar estabelecimento
+# Requer autenticação e permissão de ADMIN
+PUT {{baseUrl}}/estabelecimentos/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "telefone": "(11) 9876-5432"
+}
+
+# Remover estabelecimento
+# Requer autenticação e permissão de ADMIN
+DELETE {{baseUrl}}/estabelecimentos/1
+Authorization: Bearer {{authToken}}
+
+### Coupon Management Endpoints ###
+
+# Criar cupom
+# Requer autenticação e permissão de ADMIN
+POST {{baseUrl}}/cupons
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "codigo": "PROMO10",
+  "desconto": 10,
+  "tipo": "PORCENTAGEM",
+  "validade": "2024-12-31"
+}
+
+# Listar cupons
+# Requer autenticação
+GET {{baseUrl}}/cupons
+Authorization: Bearer {{authToken}}
+
+# Buscar cupom por ID
+# Requer autenticação
+GET {{baseUrl}}/cupons/1
+Authorization: Bearer {{authToken}}
+
+# Atualizar cupom
+# Requer autenticação e permissão de ADMIN
+PUT {{baseUrl}}/cupons/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "desconto": 15,
+  "validade": "2024-12-31"
+}
+
+# Remover cupom
+# Requer autenticação e permissão de ADMIN
+DELETE {{baseUrl}}/cupons/1
+Authorization: Bearer {{authToken}}
+
+### Payment Management Endpoints ###
+
+# Criar pagamento
+# Requer autenticação
+POST {{baseUrl}}/pagamentos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "pedidoId": 1,
+  "valor": 99.99,
+  "metodo": "CARTAO_CREDITO",
+  "status": "PENDENTE"
+}
+
+# Listar pagamentos
+# Requer autenticação
+GET {{baseUrl}}/pagamentos
+Authorization: Bearer {{authToken}}
+
+# Buscar pagamento por ID
+# Requer autenticação
+GET {{baseUrl}}/pagamentos/1
+Authorization: Bearer {{authToken}}
+
+# Atualizar status do pagamento
+# Requer autenticação e permissão de ADMIN
+PUT {{baseUrl}}/pagamentos/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "APROVADO"
+}
+
+# Remover pagamento
+# Requer autenticação e permissão de ADMIN
+DELETE {{baseUrl}}/pagamentos/1
+Authorization: Bearer {{authToken}}
+
+### Order Item Management Endpoints ###
+
+# Criar item de pedido
+# Requer autenticação
+POST {{baseUrl}}/itens-pedido
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "pedidoId": 1,
+  "produtoId": 1,
+  "quantidade": 2,
+  "precoUnitario": 5.99
+}
+
+# Listar itens de pedido
+# Requer autenticação
+GET {{baseUrl}}/itens-pedido
+Authorization: Bearer {{authToken}}
+
+# Buscar item de pedido por ID
+# Requer autenticação
+GET {{baseUrl}}/itens-pedido/1
+Authorization: Bearer {{authToken}}
+
+# Atualizar item de pedido
+# Requer autenticação
+PUT {{baseUrl}}/itens-pedido/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "quantidade": 3
+}
+
+# Remover item de pedido
+# Requer autenticação
+DELETE {{baseUrl}}/itens-pedido/1
+Authorization: Bearer {{authToken}}
+
+### File Upload Endpoints ###
+
+# Upload de imagem de produto
+# Requer autenticação e permissão de SELLER ou ADMIN
+POST {{baseUrl}}/upload/product/1/image
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="produto.jpg"
+Content-Type: image/jpeg
+
+< ./produto.jpg
+------WebKitFormBoundary--

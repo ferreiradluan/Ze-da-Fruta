@@ -133,6 +133,27 @@ A aplicação estará disponível em `http://localhost:3000`
 
 ---
 
+## 🔧 Variáveis de Ambiente
+
+As seguintes variáveis são necessárias:
+
+- `NODE_ENV`: Ambiente da aplicação (development/production)
+- `PORT`: Porta da aplicação (padrão: 3000)
+- `JWT_SECRET`: Chave secreta para geração de tokens JWT
+- `JWT_EXPIRATION`: Tempo de expiração do token JWT
+- `GOOGLE_CLIENT_ID`: Client ID do Google OAuth
+- `GOOGLE_CLIENT_SECRET`: Client Secret do Google OAuth
+- `GOOGLE_CALLBACK_URL`: URL de callback do Google OAuth
+- `DATABASE_URL`: URL de conexão com o banco de dados
+- `FRONTEND_URL`: URL do frontend permitido no CORS
+- `CORS_ORIGIN`: Origem permitida para CORS
+- `STRIPE_SECRET_KEY`: Chave secreta da API Stripe
+- `STRIPE_WEBHOOK_SECRET`: Chave do webhook Stripe
+
+Veja `.env.example` para todos os exemplos.
+
+---
+
 ## 📚 Documentação da API
 
 ### 🌐 Swagger UI

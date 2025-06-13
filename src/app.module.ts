@@ -11,13 +11,12 @@ import { DeliveryModule } from './3-delivery/3-delivery.module';
 import { PaymentModule } from './4-payment/4-payment.module';
 import { AdminModule } from './5-admin/5-admin.module';
 import { SecurityConfig, getSecurityConfig } from './common/config/security.config';
-import { EventBusModule } from './common/event-bus';
 
-@Module({  imports: [
+@Module({
+  imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    EventBusModule,
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,7 +30,8 @@ import { EventBusModule } from './common/event-bus';
           },
         ];
       },
-    }),    TypeOrmModule.forRootAsync({
+    }),
+    TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -43,14 +43,15 @@ import { EventBusModule } from './common/event-bus';
         logging: configService.get<string>('NODE_ENV') === 'development',
       }),
     }),
+    CommonModule,
     AccountManagementModule,
     SalesModule,
     DeliveryModule,
     PaymentModule,
     AdminModule,
-    CommonModule,
   ],
-  controllers: [],  providers: [
+  controllers: [],
+  providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

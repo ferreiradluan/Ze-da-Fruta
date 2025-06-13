@@ -1,7 +1,3 @@
-// Índice principal do domínio 2-sales
-// Exporta todas as principais classes, interfaces e tipos
-
-// ===== ENTIDADES (Rich Domain Model) =====
 export { Pedido } from './domain/entities/pedido.entity';
 export { ItemPedido } from './domain/entities/item-pedido.entity';
 export { Produto } from './domain/entities/produto.entity';

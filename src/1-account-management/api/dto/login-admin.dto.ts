@@ -8,7 +8,8 @@ export class LoginAdminDto {  @ApiProperty({
   })
   @IsEmail({}, { message: 'Email deve ter um formato válido' })
   @IsNotEmpty({ message: 'Email é obrigatório' })
-  email: string;
+  email!: string;
+
   @ApiProperty({
     description: 'Senha do administrador',
     example: 'zedafruta321',
@@ -16,5 +17,5 @@ export class LoginAdminDto {  @ApiProperty({
   })
   @IsNotEmpty({ message: 'Senha é obrigatória' })
   @MinLength(6, { message: 'Senha deve ter pelo menos 6 caracteres' })
-  senha: string;
+  senha!: string;
 }
