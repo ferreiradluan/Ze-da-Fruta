@@ -1,8 +1,6 @@
-import { TipoSolicitacao } from '../enums/tipo-solicitacao.enum';
-
 export interface SolicitacaoRecebidaEvent {
   solicitacaoId: string;
-  tipo: TipoSolicitacao;
+  tipo: string;
   nome: string;
   email: string;
   telefone: string;

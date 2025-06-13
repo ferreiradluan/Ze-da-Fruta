@@ -21,6 +21,16 @@ export class PedidoRepository {
       relations: ['itens', 'itens.produto', 'cupom']
     });
   }
+
+  // Alias para compatibilidade com o diagrama
+  async findById(id: string): Promise<Pedido | null> {
+    return this.buscarPorId(id);
+  }
+
+  // Alias para compatibilidade com o diagrama
+  async save(pedido: Pedido): Promise<Pedido> {
+    return this.repository.save(pedido);
+  }
   async buscarPorUsuario(userId: string): Promise<Pedido[]> {
     return this.repository.find({
       where: { clienteId: userId },
@@ -46,6 +56,22 @@ export class PedidoRepository {
       .where('produto.estabelecimentoId = :estabelecimentoId', { estabelecimentoId })
       .orderBy('pedido.createdAt', 'DESC')
       .getMany();
+  }
+
+  async findByEstabelecimento(estabelecimentoId: string): Promise<Pedido[]> {
+    return await this.repository.find({
+      where: { estabelecimentoId },
+      relations: ['itens', 'cupom'],
+      order: { createdAt: 'DESC' }
+    });
+  }
+
+  async findByEstabelecimentoAndStatus(estabelecimentoId: string, status: any): Promise<Pedido[]> {
+    return await this.repository.find({
+      where: { estabelecimentoId, status },
+      relations: ['itens', 'cupom'],
+      order: { createdAt: 'DESC' }
+    });
   }
 
   async atualizar(pedido: Pedido): Promise<Pedido> {

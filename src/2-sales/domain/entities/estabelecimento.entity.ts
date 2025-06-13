@@ -19,6 +19,9 @@ export class Estabelecimento extends BaseEntity {
   @Column({ nullable: true })
   email: string;
 
+  @Column({ nullable: true })
+  usuarioId: string; // ID do usuário proprietário
+
   @Column({ default: true })
   ativo: boolean;
 
@@ -38,4 +41,20 @@ export class Estabelecimento extends BaseEntity {
 
   @OneToMany(() => Produto, produto => produto.estabelecimento)
   produtos: Produto[];
+
+  // Métodos de Negócio (Rich Domain Model)
+  abrir(): void {
+    if (!this.ativo) {
+      throw new Error('Estabelecimento inativo não pode ser aberto');
+    }
+    this.estaAberto = true;
+  }
+
+  fechar(): void {
+    this.estaAberto = false;
+  }
+
+  podeVender(): boolean {
+    return this.ativo && this.estaAberto;
+  }
 }

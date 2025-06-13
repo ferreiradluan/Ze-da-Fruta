@@ -1,12 +1,12 @@
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/core/base.entity';
 import { Usuario } from './usuario.entity';
 
 @Entity()
 export class PerfilUsuario extends BaseEntity {
-  @Column()
-  descricao: string;
-
-  @ManyToOne(() => Usuario, (usuario) => usuario.perfis)
+  // Campos específicos omitidos conforme nota do diagrama
+  // que foca nos métodos de negócio
+  
+  @OneToOne(() => Usuario, (usuario) => usuario.perfil)
   usuario: Usuario;
 }
