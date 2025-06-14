@@ -9,6 +9,13 @@ import { EnderecoRepository } from '../../infrastructure/repositories/endereco.r
 import { UpdateUserDto } from '../../api/dto/update-user.dto';
 
 /**
+ * 🔧 FASE 3: ACCOUNTSERVICE REFATORADO PARA ORQUESTRAÇÃO PURA
+ * 
+ * ✅ APENAS persistência e consultas
+ * ✅ Lógica de negócio está na entidade Usuario
+ * ✅ Usa métodos da entidade para mudanças de estado
+ */
+/**
  * AccountService - Camada de Lógica de Negócio
  * Implementa casos de uso relacionados à gestão de contas
  */
@@ -379,7 +386,6 @@ export class AccountService {
       throw new InternalServerErrorException('Erro ao aprovar solicitação: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
-
   /**
    * Atualiza status de usuário (chamado pelo AdminService)
    */
@@ -401,7 +407,22 @@ export class AccountService {
         throw new BadRequestException('Status inválido. Permitidos: ' + statusPermitidos.join(', '));
       }
 
-      usuario.status = novoStatus.toUpperCase();
+      // ✅ Usar métodos da entidade para lógica de negócio
+      switch (novoStatus.toUpperCase()) {
+        case 'ATIVO':
+          usuario.ativar();
+          break;
+        case 'INATIVO':
+          usuario.desativar();
+          break;
+        case 'SUSPENSO':
+          usuario.suspender();
+          break;
+        default:
+          // Para outros status como BANIDO que não tem método específico
+          usuario.status = novoStatus.toUpperCase();
+      }
+
       await this.usuarioRepository.save(usuario);
 
       this.logger.log(`Status do usuário ${usuarioId} atualizado para: ${novoStatus}`);

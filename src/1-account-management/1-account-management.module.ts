@@ -14,6 +14,11 @@ import { AuthController } from './api/controllers/auth.controller';
 import { AccountController } from './api/controllers/account.controller';
 import { PartnerOnboardingController } from './api/controllers/partner-onboarding.controller';
 
+// Controllers específicos de parceiros
+import { PartnerOrdersController } from './api/controllers/partner-orders.controller';
+import { PartnerDashboardController } from './api/controllers/partner-dashboard.controller';
+import { PartnerProductsController } from './api/controllers/partner-products.controller';
+
 // Services
 import { AuthService } from './application/services/auth.service';
 import { AccountService } from './application/services/account.service';
@@ -32,9 +37,10 @@ import { GoogleAuthGuard } from './application/strategies/google-auth.guard';
 
 // Event Bus
 import { EventBusModule } from '../common/event-bus';
+// Sales Module para integração com controllers de parceiros
+import { SalesModule } from '../2-sales/2-sales.module';
 
-@Module({
-  imports: [
+@Module({  imports: [
     TypeOrmModule.forFeature([
       Usuario, 
       Admin, 
@@ -44,10 +50,17 @@ import { EventBusModule } from '../common/event-bus';
       SolicitacaoParceiro  // ✅ Usar versão corrigida
     ]),
     EventBusModule,
-  ],  controllers: [
+    SalesModule, // Importar SalesModule para integração com controllers de parceiros
+  ],controllers: [
+    // Controllers principais:
     AuthController, 
     AccountController, 
-    PartnerOnboardingController  // ✅ Registrar versão corrigida
+    PartnerOnboardingController,
+    
+    // Controllers específicos de parceiros:
+    PartnerOrdersController,      // Pedidos de parceiros
+    PartnerDashboardController,   // Dashboard de parceiros  
+    PartnerProductsController     // Produtos de parceiros
   ],
   providers: [
     // Services

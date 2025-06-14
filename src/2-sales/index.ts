@@ -21,11 +21,17 @@ export { CategoriaRepository } from './infrastructure/repositories/categoria.rep
 
 // ===== SERVICES =====
 export { SalesService } from './application/services/sales.service';
+export { CategoriaService } from './application/services/categoria.service';
+export { EstabelecimentoService } from './application/services/estabelecimento.service';
+export { CupomService } from './application/services/cupom.service';
 
-// ===== CONTROLLERS (APENAS OS 3 ESPECIFICADOS NO DIAGRAMA) =====
+// ===== CONTROLLERS =====
+export { SalesController } from './api/controllers/sales.controller';
 export { PedidosController } from './api/controllers/pedidos.controller';
 export { ProdutosController } from './api/controllers/produtos.controller';
 export { LojasController } from './api/controllers/lojas.controller';
+export { CategoriasController } from './api/controllers/categorias.controller';
+export { EstabelecimentosController } from './api/controllers/estabelecimentos.controller';
 
 // ===== EVENTOS DE DOMÍNIO =====
 export * from './domain/events';

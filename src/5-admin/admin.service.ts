@@ -81,12 +81,9 @@ export class AdminService {
   /**
    * Cria cupom global (conforme diagrama)
    */
-  async criarCupomGlobal(dadosCupom: any): Promise<any> {
-    this.logger.log('Criando cupom global');
+  async criarCupomGlobal(dadosCupom: any): Promise<any> {    this.logger.log('Criando cupom global');
     
-    // TODO: Implementar método criarCupomGlobal no SalesService
-    // const resultado = await this.salesService.criarCupomGlobal(dadosCupom);
-    const resultado = { dadosCupom, message: 'Método será implementado no SalesService' };
+    const resultado = await this.salesService.criarCupomGlobal(dadosCupom);
     
     await this.registrarAuditoria('CRIAR_CUPOM_GLOBAL', {
       dadosCupom
@@ -98,12 +95,9 @@ export class AdminService {
   /**
    * Desativa cupom (conforme diagrama)
    */
-  async desativarCupom(cupomId: string): Promise<any> {
-    this.logger.log(`Desativando cupom: ${cupomId}`);
+  async desativarCupom(cupomId: string): Promise<any> {    this.logger.log(`Desativando cupom: ${cupomId}`);
     
-    // TODO: Implementar método desativarCupom no SalesService
-    // const resultado = await this.salesService.desativarCupom(cupomId);
-    const resultado = { cupomId, status: 'desativado', message: 'Método será implementado no SalesService' };
+    const resultado = await this.salesService.desativarCupom(cupomId);
     
     await this.registrarAuditoria('DESATIVAR_CUPOM', {
       cupomId

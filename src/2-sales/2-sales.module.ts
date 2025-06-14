@@ -1,21 +1,43 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+// Controllers principais (refatorados)
+import { SalesController } from './api/controllers/sales.controller';
 import { PedidosController } from './api/controllers/pedidos.controller';
+
+// Controllers públicos especializados
+import { PublicSalesController } from './api/controllers/public-sales.controller';
+import { PublicCatalogController } from './api/controllers/public-catalog.controller';
+import { PublicEstablishmentsController } from './api/controllers/public-establishments.controller';
+
+// Controllers específicos (mantidos para funcionalidades específicas)
 import { ProdutosController } from './api/controllers/produtos.controller';
 import { LojasController } from './api/controllers/lojas.controller';
+import { CategoriasController } from './api/controllers/categorias.controller';
+import { EstabelecimentosController } from './api/controllers/estabelecimentos.controller';
+
+// Services
 import { SalesService } from './application/services/sales.service';
+import { CategoriaService } from './application/services/categoria.service';
+import { EstabelecimentoService } from './application/services/estabelecimento.service';
+import { CupomService } from './application/services/cupom.service';
+
+// Repositories
 import { PedidoRepository } from './infrastructure/repositories/pedido.repository';
 import { ProdutoRepository } from './infrastructure/repositories/produto.repository';
 import { EstabelecimentoRepository } from './infrastructure/repositories/estabelecimento.repository';
 import { CupomRepository } from './infrastructure/repositories/cupom.repository';
 import { CategoriaRepository } from './infrastructure/repositories/categoria.repository';
+
+// Entities
 import { Produto } from './domain/entities/produto.entity';
 import { Categoria } from './domain/entities/categoria.entity';
 import { Estabelecimento } from './domain/entities/estabelecimento.entity';
 import { Pedido } from './domain/entities/pedido.entity';
 import { ItemPedido } from './domain/entities/item-pedido.entity';
 import { Cupom } from './domain/entities/cupom.entity';
-import { PaymentModule } from '../4-payment/4-payment.module';
+
+// External modules
+import { PaymentModule } from '../4-payment/payment.module';
 import { EventBusModule } from '../common/event-bus';
 
 @Module({
@@ -31,19 +53,39 @@ import { EventBusModule } from '../common/event-bus';
     PaymentModule,
     EventBusModule
   ],  controllers: [
-    // APENAS OS 3 ESPECIFICADOS NO DIAGRAMA:
+    // Controllers principais (Core Sales Domain):
+    SalesController,
     PedidosController,
-    ProdutosController, 
-    LojasController
-  ],  providers: [
-    // APENAS SalesService + Repositories:
+    
+    // Controllers públicos especializados:
+    PublicSalesController,        // Vendas públicas
+    PublicCatalogController,      // Catálogo público  
+    PublicEstablishmentsController, // Estabelecimentos públicos
+    
+    // Controllers específicos (funcionalidades específicas):
+    ProdutosController,
+    LojasController, 
+    CategoriasController,
+    EstabelecimentosController
+  ],providers: [
+    // Services principais:
     SalesService,
+    CategoriaService,
+    EstabelecimentoService,
+    CupomService,
+    
+    // Repositories:
     PedidoRepository,
     ProdutoRepository,
     EstabelecimentoRepository,
     CupomRepository,
     CategoriaRepository
   ],
-  exports: [SalesService]
+  exports: [
+    SalesService,
+    CategoriaService,
+    EstabelecimentoService,
+    CupomService,
+  ],
 })
 export class SalesModule {}

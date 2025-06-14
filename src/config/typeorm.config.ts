@@ -7,7 +7,7 @@ dotenv.config();
 const isTest = process.env.NODE_ENV === 'test';
 
 export default new DataSource({
-  type: 'better-sqlite3',
+  type: 'sqlite',
   database: isTest 
     ? join(__dirname, '..', '..', 'test', 'test.sqlite')
     : process.env.DATABASE_URL || join(__dirname, '..', '..', 'database.sqlite'),

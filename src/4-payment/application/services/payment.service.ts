@@ -3,6 +3,13 @@ import { IPagamentoRepository } from '../../domain/repositories/pagamento.reposi
 import { Pagamento } from '../../domain/entities/pagamento.entity';
 import { Dinheiro } from '../../domain/value-objects/dinheiro.vo';
 
+/**
+ * 🔧 FASE 3: PAYMENTSERVICE REFATORADO PARA ORQUESTRAÇÃO PURA
+ * 
+ * ✅ APENAS persistência e consultas
+ * ✅ Lógica de negócio está na entidade Pagamento
+ * ✅ Usa factory methods e métodos da entidade
+ */
 @Injectable()
 export class PaymentService {
   constructor(

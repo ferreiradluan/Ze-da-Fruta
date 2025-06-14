@@ -1,311 +1,243 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Produto } from '../../domain/entities/produto.entity';
 import { Pedido } from '../../domain/entities/pedido.entity';
-import { Cupom } from '../../domain/entities/cupom.entity';
-import { Categoria } from '../../domain/entities/categoria.entity';
+import { Produto } from '../../domain/entities/produto.entity';
 import { Estabelecimento } from '../../domain/entities/estabelecimento.entity';
+import { Categoria } from '../../domain/entities/categoria.entity';
 import { PedidoRepository } from '../../infrastructure/repositories/pedido.repository';
 import { ProdutoRepository } from '../../infrastructure/repositories/produto.repository';
-import { EstabelecimentoRepository } from '../../infrastructure/repositories/estabelecimento.repository';
-import { CupomRepository } from '../../infrastructure/repositories/cupom.repository';
-import { CategoriaRepository } from '../../infrastructure/repositories/categoria.repository';
+import { CupomService } from './cupom.service';
 import { StatusPedido } from '../../domain/enums/status-pedido.enum';
+import { SacolaDto } from '../../domain/entities/pedido.entity';
 
 /**
- * SalesService - Seguindo estritamente o diagrama DDD
- * Contém os 5 métodos principais especificados no diagrama:
- * - criarPedido(clienteId, dadosSacola)
- * - obterPedido(pedidoId, clienteId)
- * - listarProdutosDeLoja(lojaId)
- * - obterDetalhesProduto(produtoId)
- * - aplicarCupomAoPedido(pedidoId, codigoCupom)
+ * 🔧 FASE 3: SALESSERVICE REFATORADO PARA ORQUESTRAÇÃO PURA
  * 
- * + Métodos migrados dos services extras para consolidação
+ * ✅ APENAS orquestração, consulta e persistência
+ * ✅ Toda lógica de negócio está nas entidades
+ * ✅ Events bus para comunicação entre bounded contexts
  */
 @Injectable()
 export class SalesService {
   constructor(
-    private readonly pedidoRepository: PedidoRepository,
-    private readonly produtoRepository: ProdutoRepository,
-    private readonly estabelecimentoRepository: EstabelecimentoRepository,
-    private readonly cupomRepository: CupomRepository,
-    private readonly categoriaRepository: CategoriaRepository,
+    @InjectRepository(Pedido)
+    private pedidoRepository: Repository<Pedido>,
+    @InjectRepository(Produto)
+    private produtoRepository: Repository<Produto>,
+    @InjectRepository(Estabelecimento)
+    private estabelecimentoRepository: Repository<Estabelecimento>,
+    @InjectRepository(Categoria)
+    private categoriaRepository: Repository<Categoria>,
+    private readonly pedidoRepo: PedidoRepository,
+    private readonly produtoRepo: ProdutoRepository,
     private readonly eventEmitter: EventEmitter2,
+    private readonly cupomService: CupomService,
   ) {}
-
+  // ===== MÉTODOS PRINCIPAIS DO DOMÍNIO - ORQUESTRAÇÃO PURA =====
+  
   /**
-   * Cria um novo pedido com base nos dados da sacola
-   * Método principal do diagrama para orquestrar criação de pedidos
+   * ✅ APENAS orquestração - lógica nas entidades
    */
-  async criarPedido(clienteId: string, dadosSacola: any): Promise<Pedido> {
-    // Criar pedido usando domínio rico
-    const pedido = new Pedido();
-    pedido.clienteId = clienteId;
-    pedido.itens = [];
-
-    let estabelecimentoId: string | null = null;
-
-    // Adicionar itens da sacola usando métodos do domínio rico
+  async criarPedido(clienteId: string, dadosSacola: SacolaDto): Promise<Pedido> {
+    // Usar factory method da entidade para criar o pedido
+    const pedido = Pedido.criarNovo(clienteId, dadosSacola);
+    
+    // Buscar e adicionar produtos (orquestração de infraestrutura)
     for (const itemSacola of dadosSacola.itens) {
-      const produto = await this.produtoRepository.findById(itemSacola.produtoId);
+      const produto = await this.produtoRepo.findById(itemSacola.produtoId);
       if (!produto) {
-        throw new NotFoundException(`Produto ${itemSacola.produtoId} não encontrado`);
-      }
-
-      // Validar que todos os produtos são do mesmo estabelecimento
-      if (estabelecimentoId === null) {
-        estabelecimentoId = produto.estabelecimentoId;
-      } else if (estabelecimentoId !== produto.estabelecimentoId) {
-        throw new BadRequestException('Todos os produtos devem ser do mesmo estabelecimento');
+        throw new BadRequestException(`Produto ${itemSacola.produtoId} não encontrado`);
       }
       
-      // Usar método do domínio rico Pedido
+      // Lógica na entidade
       pedido.adicionarItem(produto, itemSacola.quantidade);
     }
-
-    // Validar que há itens no pedido
-    if (!estabelecimentoId) {
-      throw new BadRequestException('Pedido deve conter pelo menos um item');
-    }
-
-    // Definir estabelecimento do pedido
-    pedido.estabelecimentoId = estabelecimentoId;
-
-    // Aplicar cupom se fornecido usando método do domínio rico
-    if (dadosSacola.cupomCodigo) {
-      const cupom = await this.cupomRepository.findByCodigo(dadosSacola.cupomCodigo);
-      if (cupom) {
-        // Usar método do domínio rico Pedido
-        pedido.aplicarCupom(cupom);
-      }
-    }
-
-    // Salvar usando repository
-    return await this.pedidoRepository.save(pedido);
+    
+    // Persistir
+    const pedidoSalvo = await this.pedidoRepo.save(pedido);
+    
+    // Publicar eventos de domínio (orquestração)
+    await this.publishDomainEvents(pedido);
+    
+    return pedidoSalvo;
   }
 
   /**
-   * Obtém um pedido específico do cliente
-   * Método do diagrama para buscar pedidos com validação de acesso
+   * ✅ APENAS consulta - sem lógica de negócio
    */
   async obterPedido(pedidoId: string, clienteId: string): Promise<Pedido> {
-    const pedido = await this.pedidoRepository.findById(pedidoId);
-    
+    const pedido = await this.pedidoRepository.findOne({
+      where: { id: pedidoId, clienteId },
+      relations: ['itens', 'itens.produto', 'cupom'],
+    });
+
     if (!pedido) {
       throw new NotFoundException('Pedido não encontrado');
-    }
-
-    if (pedido.clienteId !== clienteId) {
-      throw new ForbiddenException('Acesso negado ao pedido');
     }
 
     return pedido;
   }
 
   /**
-   * Lista produtos de uma loja específica
-   * Método do diagrama para catálogo por estabelecimento
+   * ✅ APENAS consulta
    */
   async listarProdutosDeLoja(lojaId: string): Promise<Produto[]> {
-    return await this.produtoRepository.findByEstabelecimento(lojaId);
+    return this.produtoRepository.find({
+      where: { estabelecimentoId: lojaId, ativo: true },
+      relations: ['categorias'],
+      order: { nome: 'ASC' },
+    });
   }
 
   /**
-   * Obtém detalhes de um produto específico
-   * Método do diagrama para visualização de produto individual
+   * ✅ APENAS consulta
    */
   async obterDetalhesProduto(produtoId: string): Promise<Produto> {
-    const produto = await this.produtoRepository.findById(produtoId);
-    
+    const produto = await this.produtoRepository.findOne({
+      where: { id: produtoId, ativo: true },
+      relations: ['categorias', 'estabelecimento'],
+    });
+
     if (!produto) {
       throw new NotFoundException('Produto não encontrado');
     }
 
     return produto;
   }
+
   /**
-   * Aplica cupom a um pedido
-   * Método do diagrama para aplicar descontos usando domínio rico
+   * ✅ Orquestração com lógica na entidade
    */
   async aplicarCupomAoPedido(pedidoId: string, codigoCupom: string): Promise<Pedido> {
-    const pedido = await this.pedidoRepository.findById(pedidoId);
-    
-    if (!pedido) {
-      throw new NotFoundException('Pedido não encontrado');
-    }
-
-    if (!pedido.podeSerEditado()) {
-      throw new BadRequestException('Pedido não pode ser editado');
-    }
-
-    const cupom = await this.cupomRepository.findByCodigo(codigoCupom);
-    
-    if (!cupom) {
-      throw new NotFoundException('Cupom não encontrado');
-    }
-
-    // Usar método do domínio rico Pedido
-    pedido.aplicarCupom(cupom);
-
-    return await this.pedidoRepository.save(pedido);
-  }
-
-  /**
-   * Confirma um pedido e emite evento para criar entrega
-   * Método para integração com o sistema de entregas via eventos
-   */
-  async confirmarPedido(pedidoId: string, enderecoEntrega: any): Promise<Pedido> {
-    const pedido = await this.pedidoRepository.findById(pedidoId);
-    
-    if (!pedido) {
-      throw new NotFoundException('Pedido não encontrado');
-    }
-
-    // Atualizar status do pedido para confirmado/pago
-    pedido.status = StatusPedido.PAGO;
-    const pedidoConfirmado = await this.pedidoRepository.save(pedido);
-
-    // ✅ EMITIR EVENTO PARA CRIAR ENTREGA
-    await this.eventEmitter.emitAsync('pedido.confirmado', {
-      pedidoId: pedido.id,
-      enderecoEntrega: enderecoEntrega,
-      enderecoColeta: {
-        rua: 'Rua do Estabelecimento', 
-        numero: '123',
-        cidade: 'São Paulo',
-        cep: '01234-567'
-      }
+    const pedido = await this.pedidoRepository.findOne({
+      where: { id: pedidoId },
     });
 
-    return pedidoConfirmado;
-  }
-
-  // ===== MÉTODOS MIGRADOS DOS SERVICES EXTRAS =====
-    // De CategoriaService:
-  async listarCategoriasPublico(): Promise<Categoria[]> {
-    return await this.categoriaRepository.findAll();
-  }
-
-  // De CupomService:
-  async validarCupom(codigo: string, valorPedido: number): Promise<any> {
-    const cupom = await this.cupomRepository.findByCodigo(codigo);
-    if (!cupom || !cupom.ativo) {
-      return { valido: false, motivo: 'Cupom inválido ou inativo' };
+    if (!pedido) {
+      throw new NotFoundException('Pedido não encontrado');
     }
 
-    if (cupom.dataVencimento && cupom.dataVencimento < new Date()) {
-      return { valido: false, motivo: 'Cupom expirado' };
-    }
+    // Orquestração: validar cupom via service especializado
+    const { cupom } = await this.cupomService.validarCupom(
+      codigoCupom, 
+      pedido.valorSubtotal
+    );
+
+    // Lógica na entidade
+    pedido.aplicarCupom(cupom);
+
+    const pedidoAtualizado = await this.pedidoRepository.save(pedido);
     
-    const desconto = cupom.calcularDesconto(valorPedido);
-    return {
-      valido: true,
-      motivo: 'Cupom válido',
-      desconto: desconto,
-      cupom: cupom,
-      valorFinal: valorPedido - desconto
-    };
+    // Publicar eventos
+    await this.publishDomainEvents(pedido);
+
+    return pedidoAtualizado;
   }
 
-  // De LojaService:
+  /**
+   * ✅ Orquestração com lógica na entidade
+   */
+  async confirmarPedido(pedidoId: string, endereco?: any): Promise<Pedido> {
+    const pedido = await this.pedidoRepository.findOne({
+      where: { id: pedidoId },
+    });
+
+    if (!pedido) {
+      throw new NotFoundException('Pedido não encontrado');
+    }
+
+    // Lógica na entidade
+    pedido.confirmar(endereco);
+    
+    const pedidoAtualizado = await this.pedidoRepository.save(pedido);
+    
+    // Publicar eventos
+    await this.publishDomainEvents(pedido);
+    
+    return pedidoAtualizado;
+  }
+  // ===== MÉTODOS DE CONSULTA PÚBLICA =====
+
+  /**
+   * ✅ APENAS consulta
+   */
+  async listarCategoriasPublico(): Promise<Categoria[]> {
+    return this.categoriaRepository.find({
+      where: { ativo: true },
+      order: { nome: 'ASC' }
+    });
+  }
+
+  /**
+   * ✅ APENAS consulta
+   */
   async listarEstabelecimentosPublico(): Promise<Estabelecimento[]> {
-    return await this.estabelecimentoRepository.findPublic();
+    return this.estabelecimentoRepository.find({
+      where: { ativo: true },
+      select: ['id', 'nome', 'descricao', 'endereco', 'telefone', 'imagemUrl'],
+      order: { nome: 'ASC' }
+    });
   }
 
-  async obterDetalhesLoja(id: string): Promise<Estabelecimento> {
-    const estabelecimento = await this.estabelecimentoRepository.findById(id);
-    if (!estabelecimento) {
-      throw new NotFoundException('Estabelecimento não encontrado');
-    }
-    return estabelecimento;
-  }
-
+  /**
+   * ✅ APENAS consulta com filtros
+   */
   async buscarProdutosPublico(filtros: any): Promise<Produto[]> {
-    return await this.produtoRepository.findWithFilters(filtros);
-  }
+    const queryBuilder = this.produtoRepository.createQueryBuilder('produto');
+    
+    queryBuilder
+      .leftJoinAndSelect('produto.categorias', 'categoria')
+      .leftJoinAndSelect('produto.estabelecimento', 'estabelecimento')
+      .where('produto.ativo = :ativo', { ativo: true })
+      .andWhere('estabelecimento.ativo = :estabelecimentoAtivo', { estabelecimentoAtivo: true });
 
-  // De LojistaPedidoService:
-  async listarPedidosPorEstabelecimento(estabelecimentoId: string, status?: StatusPedido): Promise<Pedido[]> {
-    if (status) {
-      return await this.pedidoRepository.findByEstabelecimentoAndStatus(estabelecimentoId, status);
+    if (filtros.nome) {
+      queryBuilder.andWhere('produto.nome LIKE :nome', { 
+        nome: `%${filtros.nome}%` 
+      });
     }
-    return await this.pedidoRepository.findByEstabelecimento(estabelecimentoId);
-  }
-  /**
-   * Cria cupom global (chamado pelo AdminService)
-   */
-  async criarCupomGlobal(dadosCupom: any): Promise<any> {
-    try {
-      // Criar cupom global usando domínio rico
-      const cupom = new Cupom();
-      cupom.codigo = dadosCupom.codigo || this.gerarCodigoCupom();
-      cupom.descricao = dadosCupom.descricao || 'Cupom Global';
-      cupom.tipoDesconto = dadosCupom.tipoDesconto || 'PERCENTUAL';
-      cupom.valor = dadosCupom.valor || 10; // 10% ou R$ 10
-      cupom.valorMinimoCompra = dadosCupom.valorMinimo || 0;
-      cupom.valorMaximoDesconto = dadosCupom.valorMaximo || null;
-      cupom.dataValidade = dadosCupom.dataValidade ? new Date(dadosCupom.dataValidade) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 dias
-      cupom.ativo = true;
-      cupom.limitesUso = dadosCupom.limitesUso || 1000; // Limite alto para cupom global
-      cupom.vezesUsado = 0;
-      // cupom.estabelecimentoId permanece undefined para cupons globais
 
-      const cupomSalvo = await this.cupomRepository.save(cupom);
-
-      return {
-        id: cupomSalvo.id,
-        codigo: cupomSalvo.codigo,
-        descricao: cupomSalvo.descricao,
-        tipoDesconto: cupomSalvo.tipoDesconto,
-        valor: cupomSalvo.valor,
-        valorMinimoCompra: cupomSalvo.valorMinimoCompra,
-        valorMaximoDesconto: cupomSalvo.valorMaximoDesconto,
-        dataValidade: cupomSalvo.dataValidade,
-        isGlobal: true,
-        message: 'Cupom global criado com sucesso'
-      };
-    } catch (error) {
-      throw new BadRequestException('Erro ao criar cupom global: ' + (error instanceof Error ? error.message : String(error)));
+    if (filtros.categoria) {
+      queryBuilder.andWhere('categoria.nome = :categoria', { categoria: filtros.categoria });
     }
+
+    if (filtros.estabelecimento) {
+      queryBuilder.andWhere('estabelecimento.nome LIKE :estabelecimento', { 
+        estabelecimento: `%${filtros.estabelecimento}%` 
+      });
+    }
+
+    return queryBuilder
+      .orderBy('produto.nome', 'ASC')
+      .getMany();
   }
+
+  // ===== MÉTODOS DE DELEGAÇÃO PARA CUPOM SERVICE =====
+  
+  async validarCupom(codigo: string, valorPedido: number) {
+    return this.cupomService.validarCupom(codigo, valorPedido);
+  }
+
+  async criarCupomGlobal(dadosCupom: any) {
+    return this.cupomService.criarCupomGlobal(dadosCupom);
+  }
+
+  async desativarCupom(cupomId: string) {
+    return this.cupomService.desativarCupom(cupomId);
+  }
+
+  // ===== MÉTODOS PRIVADOS - ORQUESTRAÇÃO =====
 
   /**
-   * Desativa cupom (chamado pelo AdminService)
+   * ✅ Helper para publicar eventos de domínio
    */
-  async desativarCupom(cupomId: string): Promise<any> {
-    try {
-      const cupom = await this.cupomRepository.findById(cupomId);
-
-      if (!cupom) {
-        throw new NotFoundException('Cupom não encontrado');
-      }
-
-      // Usar método do domínio rico para desativar
-      cupom.ativo = false;
-      
-      const cupomAtualizado = await this.cupomRepository.save(cupom);
-
-      return {
-        id: cupomAtualizado.id,
-        codigo: cupomAtualizado.codigo,
-        ativo: cupomAtualizado.ativo,
-        message: 'Cupom desativado com sucesso'
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new BadRequestException('Erro ao desativar cupom: ' + (error instanceof Error ? error.message : String(error)));
+  private async publishDomainEvents(entity: { getDomainEvents(): any[]; clearDomainEvents(): void }): Promise<void> {
+    const eventos = entity.getDomainEvents();
+    for (const evento of eventos) {
+      this.eventEmitter.emit(evento.eventName, evento);
     }
-  }
-
-  /**
-   * Gera código único para cupom
-   */
-  private gerarCodigoCupom(): string {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 8);
-    return `GLOBAL_${timestamp}_${random}`.toUpperCase();
+    entity.clearDomainEvents();
   }
 }

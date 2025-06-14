@@ -5,6 +5,13 @@ import { Entrega } from '../../domain/entities/entrega.entity';
 import { StatusEntrega, StatusEntregaType, isValidStatusEntrega } from '../../domain/constants/status-entrega.constants';
 import { EnderecoVO } from '../../domain/value-objects/endereco-vo';
 
+/**
+ * 🔧 FASE 3: DELIVERYSERVICE REFATORADO PARA ORQUESTRAÇÃO PURA
+ * 
+ * ✅ APENAS persistência e consultas
+ * ✅ Lógica de negócio está na entidade Entrega
+ * ✅ Usa métodos da entidade para mudanças de estado
+ */
 @Injectable()
 export class DeliveryService {
   constructor(

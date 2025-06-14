@@ -1,15 +1,18 @@
 // src/app.module.ts
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { CommonModule } from './common/common.module';
+import { MonitoringModule } from './common/monitoring.module';
+import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
+import { SystemMetricsMiddleware } from './common/middleware/system-metrics.middleware';
 import { AccountManagementModule } from './1-account-management/1-account-management.module';
 import { SalesModule } from './2-sales/2-sales.module';
 import { DeliveryModule } from './3-delivery/3-delivery.module';
-import { PaymentModule } from './4-payment/4-payment.module';
+import { PaymentModule } from './4-payment/payment.module';
 import { AdminModule } from './5-admin/5-admin.module';
 import { SecurityConfig, getSecurityConfig } from './common/config/security.config';
 
@@ -47,20 +50,30 @@ import { SecurityConfig, getSecurityConfig } from './common/config/security.conf
         synchronize: true, // <-- Ativado para o primeiro deploy
         logging: configService.get<string>('NODE_ENV') === 'development',
       }),
-    }),
-    CommonModule,
+    }),    CommonModule,
+    MonitoringModule,
     AccountManagementModule,
     SalesModule,
     DeliveryModule,
     PaymentModule,
     AdminModule,
   ],
-  controllers: [],
-  providers: [
+  controllers: [],  providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: MetricsInterceptor,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // ✅ FASE 6: Sistema de métricas middleware para todas as rotas
+    consumer
+      .apply(SystemMetricsMiddleware)
+      .forRoutes('*');
+  }
+}

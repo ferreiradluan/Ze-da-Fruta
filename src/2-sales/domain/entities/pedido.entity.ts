@@ -5,46 +5,70 @@ import { ItemPedido } from './item-pedido.entity';
 import { Cupom } from './cupom.entity';
 import { Produto } from './produto.entity';
 import { Dinheiro } from '../value-objects/dinheiro.vo';
+import { BadRequestException } from '@nestjs/common';
+import { 
+  PedidoCriadoEvent, 
+  PedidoConfirmadoEvent, 
+  PedidoCanceladoEvent,
+  PedidoStatusAtualizadoEvent 
+} from '../events/pedido.events';
+import { DomainEvent } from '../../../common/domain/events/domain-event';
+
+// DTOs para Factory Methods
+export interface SacolaDto {
+  itens: { produtoId: string; quantidade: number }[];
+  enderecoEntrega?: string;
+  observacoes?: string;
+}
+
+export interface EnderecoDto {
+  logradouro: string;
+  numero: string;
+  cep: string;
+  cidade: string;
+  estado: string;
+  complemento?: string;
+}
 
 @Entity('pedidos')
 export class Pedido extends BaseEntity {
   @Column()
-  clienteId: string;
+  clienteId!: string;
 
   @Column({
     type: 'varchar',
     enum: StatusPedido,
     default: StatusPedido.PAGAMENTO_PENDENTE
   })
-  status: StatusPedido;
+  status!: StatusPedido;
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  valorTotal: number;
+  valorTotal!: number;
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  valorDesconto: number;
+  valorDesconto!: number;
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  valorSubtotal: number;
+  valorSubtotal!: number;
 
   @Column({ nullable: true })
-  observacoes: string;
+  observacoes?: string;
 
   @Column({ nullable: true })
-  enderecoEntrega: string;
+  enderecoEntrega?: string;
 
   @Column({ nullable: true })
-  telefoneContato: string;
+  telefoneContato?: string;
 
   @Column({ nullable: true })
-  dataEntregaPrevista: Date;
+  dataEntregaPrevista?: Date;
 
   @Column({ nullable: true })
-  estabelecimentoId: string;
+  estabelecimentoId?: string;
 
   // Relacionamentos
   @OneToMany(() => ItemPedido, item => item.pedido, { cascade: true, eager: true })
-  itens: ItemPedido[];
+  itens!: ItemPedido[];
 
   @ManyToOne(() => Cupom, { nullable: true })
   @JoinColumn({ name: 'cupom_id' })
@@ -52,6 +76,214 @@ export class Pedido extends BaseEntity {
 
   @Column({ type: 'varchar', nullable: true })
   cupomId: string | null = null;
+
+  // ===== DOMAIN EVENTS =====
+  private domainEvents: DomainEvent[] = [];
+
+  private addDomainEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
+  }
+
+  getDomainEvents(): DomainEvent[] {
+    return [...this.domainEvents];
+  }
+
+  clearDomainEvents(): void {
+    this.domainEvents = [];
+  }
+  // ===== FACTORY METHODS (DDD Pattern) =====
+    /**
+   * Factory method para criar um novo pedido
+   * Encapsula toda a lógica de criação e validação
+   */
+  static criarNovo(clienteId: string, dadosSacola: SacolaDto): Pedido {
+    const pedido = new Pedido();
+    pedido.clienteId = clienteId;
+    pedido.status = StatusPedido.PAGAMENTO_PENDENTE;
+    pedido.itens = [];
+    pedido.valorTotal = 0;
+    pedido.valorSubtotal = 0;
+    pedido.valorDesconto = 0;
+    
+    // Validar sacola antes de processar
+    pedido.validarSacola(dadosSacola);
+    
+    // Definir dados adicionais
+    if (dadosSacola.enderecoEntrega) {
+      pedido.enderecoEntrega = dadosSacola.enderecoEntrega;
+    }
+    if (dadosSacola.observacoes) {
+      pedido.observacoes = dadosSacola.observacoes;
+    }
+    
+    // Disparar evento de criação
+    pedido.addDomainEvent(new PedidoCriadoEvent(
+      pedido.id,
+      clienteId,
+      pedido.valorTotal,
+      pedido.itens.length,
+      pedido.estabelecimentoId
+    ));
+    
+    return pedido;
+  }
+
+  static criarParaTeste(clienteId: string): Pedido {
+    const pedido = new Pedido();
+    pedido.clienteId = clienteId;
+    pedido.status = StatusPedido.PAGAMENTO_PENDENTE;
+    pedido.itens = [];
+    pedido.valorTotal = 0;
+    pedido.valorSubtotal = 0;
+    pedido.valorDesconto = 0;
+    return pedido;
+  }
+
+  // ===== MÉTODOS DE NEGÓCIO PRINCIPAIS =====
+  confirmar(endereco?: EnderecoDto): void {
+    if (this.status !== StatusPedido.PAGAMENTO_PENDENTE) {
+      throw new Error('Apenas pedidos com pagamento pendente podem ser confirmados');
+    }
+
+    if (this.itens.length === 0) {
+      throw new Error('Não é possível confirmar um pedido sem itens');
+    }
+
+    if (endereco) {
+      this.enderecoEntrega = this.formatarEndereco(endereco);
+    }
+
+    this.status = StatusPedido.PAGO;
+    
+    // Usar o cupom se houver
+    if (this.cupom) {
+      this.cupom.usar();
+    }
+
+    // Reservar estoque dos produtos
+    this.reservarEstoqueProdutos();
+
+    // Disparar evento de confirmação
+    this.addDomainEvent(new PedidoConfirmadoEvent(
+      this.id,
+      this.clienteId,
+      this.valorTotal,
+      this.enderecoEntrega
+    ));
+  }
+  cancelar(motivo?: string): void {
+    if (this.status === StatusPedido.ENTREGUE) {
+      throw new Error('Pedidos entregues não podem ser cancelados');
+    }
+
+    if (this.status === StatusPedido.CANCELADO) {
+      throw new Error('Pedido já está cancelado');
+    }
+
+    this.status = StatusPedido.CANCELADO;
+    
+    // Liberar cupom se houver
+    if (this.cupom) {
+      this.cupom.vezesUsado = Math.max(0, this.cupom.vezesUsado - 1);
+    }
+
+    // Liberar estoque reservado
+    this.liberarEstoqueProdutos();
+
+    // Adicionar motivo às observações
+    if (motivo) {
+      this.observacoes = this.observacoes 
+        ? `${this.observacoes}\n\nCancelamento: ${motivo}`
+        : `Cancelamento: ${motivo}`;
+    }
+
+    // Disparar evento de cancelamento
+    this.addDomainEvent(new PedidoCanceladoEvent(
+      this.id,
+      this.clienteId,
+      motivo
+    ));
+  }
+
+  // ===== VALIDAÇÕES DE NEGÓCIO =====
+
+  private validarSacola(sacola: SacolaDto): void {
+    if (!sacola.itens || sacola.itens.length === 0) {
+      throw new BadRequestException('Sacola não pode estar vazia');
+    }
+
+    // Validar cada item da sacola
+    for (const item of sacola.itens) {
+      if (!item.produtoId) {
+        throw new BadRequestException('Produto ID é obrigatório');
+      }
+      if (!item.quantidade || item.quantidade <= 0) {
+        throw new BadRequestException('Quantidade deve ser maior que zero');
+      }
+      if (item.quantidade > 100) {
+        throw new BadRequestException('Quantidade não pode ser maior que 100 por item');
+      }
+    }
+  }
+
+  private validarEstabelecimentoUnico(): void {
+    if (this.itens.length === 0) return;
+
+    const estabelecimentos = new Set(
+      this.itens.map(item => item.produto?.estabelecimentoId).filter(Boolean)
+    );
+
+    if (estabelecimentos.size > 1) {
+      throw new BadRequestException('Todos os produtos devem ser do mesmo estabelecimento');
+    }
+
+    // Definir estabelecimento do pedido
+    const estabelecimentoId = Array.from(estabelecimentos)[0];
+    if (estabelecimentoId) {
+      this.estabelecimentoId = estabelecimentoId;
+    }
+  }
+
+  private validarProdutosDisponiveis(): void {
+    for (const item of this.itens) {
+      if (!item.produto) continue;
+      
+      if (!item.produto.estaDisponivel()) {
+        throw new BadRequestException(`Produto ${item.produto.nome} não está disponível`);
+      }
+      
+      if (!item.produto.temEstoqueSuficiente(item.quantidade)) {
+        throw new BadRequestException(
+          `Estoque insuficiente para ${item.produto.nome}. Disponível: ${item.produto.estoque}`
+        );
+      }
+    }
+  }
+
+  private calcularValores(): void {
+    this.valorSubtotal = this.itens.reduce((total, item) => total + item.subtotal, 0);
+    this.valorTotal = this.valorSubtotal - this.valorDesconto;
+  }
+
+  private reservarEstoqueProdutos(): void {
+    for (const item of this.itens) {
+      if (item.produto && item.produto.reservarEstoque) {
+        item.produto.reservarEstoque(item.quantidade);
+      }
+    }
+  }
+
+  private liberarEstoqueProdutos(): void {
+    for (const item of this.itens) {
+      if (item.produto && item.produto.liberarEstoque) {
+        item.produto.liberarEstoque(item.quantidade);
+      }
+    }
+  }
+
+  private formatarEndereco(endereco: EnderecoDto): string {
+    return `${endereco.logradouro}, ${endereco.numero}${endereco.complemento ? `, ${endereco.complemento}` : ''}, ${endereco.cidade}/${endereco.estado}, CEP: ${endereco.cep}`;
+  }
 
   // Métodos para trabalhar com Value Objects
   getValorTotal(): Dinheiro {
@@ -160,46 +392,10 @@ export class Pedido extends BaseEntity {
     this.calcularTotal();
   }
 
-  removerCupom(): void {
-    this.cupom = null;
+  removerCupom(): void {    this.cupom = null;
     this.cupomId = null;
     this.calcularTotal();
   }
-
-  confirmar(): void {
-    if (this.status !== StatusPedido.PAGAMENTO_PENDENTE) {
-      throw new Error('Apenas pedidos com pagamento pendente podem ser confirmados');
-    }
-
-    if (this.itens.length === 0) {
-      throw new Error('Não é possível confirmar um pedido sem itens');
-    }
-
-    this.status = StatusPedido.PAGO;
-    
-    // Usar o cupom se houver
-    if (this.cupom) {
-      this.cupom.usar();
-    }
-  }
-
-  cancelar(): void {
-    if (this.status === StatusPedido.ENTREGUE) {
-      throw new Error('Pedidos entregues não podem ser cancelados');
-    }
-
-    if (this.status === StatusPedido.CANCELADO) {
-      throw new Error('Pedido já está cancelado');
-    }
-
-    this.status = StatusPedido.CANCELADO;
-    
-    // Liberar cupom se houver
-    if (this.cupom) {
-      this.cupom.vezesUsado = Math.max(0, this.cupom.vezesUsado - 1);
-    }
-  }
-
   atualizarStatus(novoStatus: StatusPedido): void {
     // Validar transições de status válidas
     const transicoesValidas = this.obterTransicoesValidas();
@@ -208,7 +404,16 @@ export class Pedido extends BaseEntity {
       throw new Error(`Transição de ${this.status} para ${novoStatus} não é permitida`);
     }
 
+    const statusAnterior = this.status;
     this.status = novoStatus;
+
+    // Disparar evento de atualização de status
+    this.addDomainEvent(new PedidoStatusAtualizadoEvent(
+      this.id,
+      statusAnterior,
+      novoStatus,
+      this.clienteId
+    ));
   }
 
   private obterTransicoesValidas(): StatusPedido[] {
@@ -269,5 +474,24 @@ export class Pedido extends BaseEntity {
       } : null,
       createdAt: this.createdAt
     };
+  }
+
+  // Validações de Domínio Rico
+  validar(): void {
+    if (!this.clienteId) {
+      throw new BadRequestException('Cliente não identificado');
+    }
+
+    if (!this.itens || this.itens.length === 0) {
+      throw new BadRequestException('Pedido deve ter pelo menos um item');
+    }
+
+    this.itens.forEach(item => {
+      item.validar();
+    });
+  }
+
+  atualizarEnderecoEntrega(endereco: EnderecoDto): void {
+    this.enderecoEntrega = `${endereco.logradouro}, ${endereco.numero} - ${endereco.cidade}/${endereco.estado}`;
   }
 }
