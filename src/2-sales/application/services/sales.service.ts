@@ -2,19 +2,25 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException 
 import { Produto } from '../../domain/entities/produto.entity';
 import { Pedido } from '../../domain/entities/pedido.entity';
 import { Cupom } from '../../domain/entities/cupom.entity';
+import { Categoria } from '../../domain/entities/categoria.entity';
+import { Estabelecimento } from '../../domain/entities/estabelecimento.entity';
 import { PedidoRepository } from '../../infrastructure/repositories/pedido.repository';
 import { ProdutoRepository } from '../../infrastructure/repositories/produto.repository';
 import { EstabelecimentoRepository } from '../../infrastructure/repositories/estabelecimento.repository';
 import { CupomRepository } from '../../infrastructure/repositories/cupom.repository';
+import { CategoriaRepository } from '../../infrastructure/repositories/categoria.repository';
+import { StatusPedido } from '../../domain/enums/status-pedido.enum';
 
 /**
  * SalesService - Seguindo estritamente o diagrama DDD
- * Contém apenas os 5 métodos especificados no diagrama:
+ * Contém os 5 métodos principais especificados no diagrama:
  * - criarPedido(clienteId, dadosSacola)
  * - obterPedido(pedidoId, clienteId)
  * - listarProdutosDeLoja(lojaId)
  * - obterDetalhesProduto(produtoId)
  * - aplicarCupomAoPedido(pedidoId, codigoCupom)
+ * 
+ * + Métodos migrados dos services extras para consolidação
  */
 @Injectable()
 export class SalesService {
@@ -23,6 +29,7 @@ export class SalesService {
     private readonly produtoRepository: ProdutoRepository,
     private readonly estabelecimentoRepository: EstabelecimentoRepository,
     private readonly cupomRepository: CupomRepository,
+    private readonly categoriaRepository: CategoriaRepository,
   ) {}
 
   /**
@@ -115,7 +122,6 @@ export class SalesService {
 
     return produto;
   }
-
   /**
    * Aplica cupom a um pedido
    * Método do diagrama para aplicar descontos usando domínio rico
@@ -141,5 +147,57 @@ export class SalesService {
     pedido.aplicarCupom(cupom);
 
     return await this.pedidoRepository.save(pedido);
+  }
+
+  // ===== MÉTODOS MIGRADOS DOS SERVICES EXTRAS =====
+    // De CategoriaService:
+  async listarCategoriasPublico(): Promise<Categoria[]> {
+    return await this.categoriaRepository.findAll();
+  }
+
+  // De CupomService:
+  async validarCupom(codigo: string, valorPedido: number): Promise<any> {
+    const cupom = await this.cupomRepository.findByCodigo(codigo);
+    if (!cupom || !cupom.ativo) {
+      return { valido: false, motivo: 'Cupom inválido ou inativo' };
+    }
+
+    if (cupom.dataVencimento && cupom.dataVencimento < new Date()) {
+      return { valido: false, motivo: 'Cupom expirado' };
+    }
+    
+    const desconto = cupom.calcularDesconto(valorPedido);
+    return {
+      valido: true,
+      motivo: 'Cupom válido',
+      desconto: desconto,
+      cupom: cupom,
+      valorFinal: valorPedido - desconto
+    };
+  }
+
+  // De LojaService:
+  async listarEstabelecimentosPublico(): Promise<Estabelecimento[]> {
+    return await this.estabelecimentoRepository.findPublic();
+  }
+
+  async obterDetalhesLoja(id: string): Promise<Estabelecimento> {
+    const estabelecimento = await this.estabelecimentoRepository.findById(id);
+    if (!estabelecimento) {
+      throw new NotFoundException('Estabelecimento não encontrado');
+    }
+    return estabelecimento;
+  }
+
+  async buscarProdutosPublico(filtros: any): Promise<Produto[]> {
+    return await this.produtoRepository.findWithFilters(filtros);
+  }
+
+  // De LojistaPedidoService:
+  async listarPedidosPorEstabelecimento(estabelecimentoId: string, status?: StatusPedido): Promise<Pedido[]> {
+    if (status) {
+      return await this.pedidoRepository.findByEstabelecimentoAndStatus(estabelecimentoId, status);
+    }
+    return await this.pedidoRepository.findByEstabelecimento(estabelecimentoId);
   }
 }

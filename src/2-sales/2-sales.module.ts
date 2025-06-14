@@ -3,14 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PedidosController } from './api/controllers/pedidos.controller';
 import { ProdutosController } from './api/controllers/produtos.controller';
 import { LojasController } from './api/controllers/lojas.controller';
-import { CategoriasController } from './api/controllers/categorias.controller';
-import { CuponsController } from './api/controllers/cupons.controller';
-import { LojistaPedidosController } from './api/controllers/lojista-pedidos.controller';
 import { SalesService } from './application/services/sales.service';
-import { CategoriaService } from './application/services/categoria.service';
-import { CupomService } from './application/services/cupom.service';
-import { LojaService } from './application/services/loja.service';
-import { LojistaPedidoService } from './application/services/lojista-pedido.service';
 import { PedidoRepository } from './infrastructure/repositories/pedido.repository';
 import { ProdutoRepository } from './infrastructure/repositories/produto.repository';
 import { EstabelecimentoRepository } from './infrastructure/repositories/estabelecimento.repository';
@@ -37,21 +30,14 @@ import { EventBusModule } from '../common/event-bus';
     ]),
     PaymentModule,
     EventBusModule
-  ],
-  controllers: [
-    PedidosController, 
+  ],  controllers: [
+    // APENAS OS 3 ESPECIFICADOS NO DIAGRAMA:
+    PedidosController,
     ProdutosController, 
-    LojasController,
-    CategoriasController,
-    CuponsController,
-    LojistaPedidosController
-  ],
-  providers: [
+    LojasController
+  ],  providers: [
+    // APENAS SalesService + Repositories:
     SalesService,
-    CategoriaService,
-    CupomService,
-    LojaService,
-    LojistaPedidoService,
     PedidoRepository,
     ProdutoRepository,
     EstabelecimentoRepository,

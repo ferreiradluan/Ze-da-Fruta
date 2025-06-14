@@ -1,3 +1,4 @@
+// ===== ENTITIES =====
 export { Pedido } from './domain/entities/pedido.entity';
 export { ItemPedido } from './domain/entities/item-pedido.entity';
 export { Produto } from './domain/entities/produto.entity';
@@ -16,11 +17,12 @@ export { PedidoRepository } from './infrastructure/repositories/pedido.repositor
 export { ProdutoRepository } from './infrastructure/repositories/produto.repository';
 export { EstabelecimentoRepository } from './infrastructure/repositories/estabelecimento.repository';
 export { CupomRepository } from './infrastructure/repositories/cupom.repository';
+export { CategoriaRepository } from './infrastructure/repositories/categoria.repository';
 
 // ===== SERVICES =====
 export { SalesService } from './application/services/sales.service';
 
-// ===== CONTROLLERS =====
+// ===== CONTROLLERS (APENAS OS 3 ESPECIFICADOS NO DIAGRAMA) =====
 export { PedidosController } from './api/controllers/pedidos.controller';
 export { ProdutosController } from './api/controllers/produtos.controller';
 export { LojasController } from './api/controllers/lojas.controller';

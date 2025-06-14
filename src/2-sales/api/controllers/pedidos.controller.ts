@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Body, Param, UseGuards, Req, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../1-account-management/application/strategies/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../1-account-management/application/strategies/guards/roles.guard';
 import { Roles } from '../../../1-account-management/application/strategies/guards/roles.decorator';
 import { RoleType } from '../../../1-account-management/domain/enums/role-type.enum';
 import { SalesService } from '../../application/services/sales.service';
+import { StatusPedido } from '../../domain/enums/status-pedido.enum';
 
 @ApiTags('👤 Cliente - Pedidos')
 @Controller('pedidos')
@@ -45,8 +46,7 @@ export class PedidosController {
   async obterPedido(@Req() req, @Param('id') pedidoId: string) {
     return this.salesService.obterPedido(pedidoId, req.user.id);
   }
-
-  @Patch(':id/cupom')
+  @Put(':id/cupom')
   @Roles(RoleType.USER)
   @ApiOperation({
     summary: 'Aplicar cupom ao pedido',
@@ -57,7 +57,26 @@ export class PedidosController {
     description: 'ID do pedido',
     type: 'string'
   })
-  async aplicarCupom(@Param('id') pedidoId: string, @Body() body: { codigoCupom: string }) {
-    return this.salesService.aplicarCupomAoPedido(pedidoId, body.codigoCupom);
+  async aplicarCupom(@Param('id') pedidoId: string, @Body() { codigo }: { codigo: string }) {
+    return this.salesService.aplicarCupomAoPedido(pedidoId, codigo);
+  }
+
+  // Migrar funcionalidades de lojista:
+  @Get('loja/:estabelecimentoId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.PARTNER)
+  @ApiTags('🏪 Lojista - Pedidos')
+  @ApiOperation({
+    summary: 'Listar pedidos da loja',
+    description: 'Lista pedidos de um estabelecimento específico (apenas para lojistas)'
+  })
+  @ApiParam({
+    name: 'estabelecimentoId',
+    description: 'ID do estabelecimento',
+    type: 'string'
+  })
+  @ApiBearerAuth('JWT-auth')
+  async listarPedidosLoja(@Param('estabelecimentoId') estabelecimentoId: string, @Query('status') status?: StatusPedido) {
+    return this.salesService.listarPedidosPorEstabelecimento(estabelecimentoId, status);
   }
 }

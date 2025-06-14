@@ -134,6 +134,25 @@ export const ApiEndpoints = {
     perfil: '/delivery/profile/me',
     listarEntregas: '/delivery/entregas', // método comum
     atualizarEntrega: '/delivery/entregas/{id}', // método comum
+  },  sales: {
+    pedidos: {
+      criar: '/pedidos',
+      obter: '/pedidos/{id}',
+      aplicarCupom: '/pedidos/{id}/cupom',
+      listarPorLoja: '/pedidos/loja/{estabelecimentoId}'
+    },
+    produtos: {
+      listarPorLoja: '/produtos/loja/{lojaId}',
+      obterDetalhes: '/produtos/{id}/detalhes',
+      buscarPublico: '/produtos/publico',
+      categorias: '/produtos/categorias'
+    },
+    lojas: {
+      listar: '/sales/lojas',
+      obterDetalhes: '/sales/lojas/{id}',
+      produtos: '/sales/lojas/{id}/produtos',
+      validarCupom: '/sales/lojas/cupom/validar'
+    }
   },
   catalogo: {
     produtoDetalhe: '/produtos/catalogo/{id}',
