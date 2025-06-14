@@ -343,4 +343,76 @@ export class AccountService {
       throw new InternalServerErrorException('Erro ao obter endereços: ' + (err?.message || err));
     }
   }
+
+  /**
+   * Aprova solicitação de parceiro (chamado pelo AdminService)
+   */
+  async aprovarSolicitacaoParceiro(solicitacaoId: string): Promise<any> {
+    this.logger.log(`Aprovando solicitação de parceiro: ${solicitacaoId}`);
+    
+    try {
+      // Buscar usuário pela solicitação (assumindo que solicitacaoId é o userId por enquanto)
+      const usuario = await this.usuarioRepository.findOne({
+        where: { id: solicitacaoId },
+        relations: ['perfil', 'roles']
+      });
+
+      if (!usuario) {
+        throw new NotFoundException('Usuário/Solicitação não encontrado');
+      }
+
+      // Atualizar status do perfil para aprovado
+      if (usuario.perfil) {
+        usuario.perfil.statusPerfil = 'APROVADO';
+        await this.usuarioRepository.save(usuario);
+      }
+
+      this.logger.log(`Solicitação de parceiro aprovada: ${solicitacaoId}`);
+      
+      return {
+        solicitacaoId,
+        usuarioId: usuario.id,
+        status: 'APROVADO',
+        message: 'Solicitação de parceiro aprovada com sucesso'
+      };    } catch (error) {
+      this.logger.error('Erro ao aprovar solicitação de parceiro', error);
+      throw new InternalServerErrorException('Erro ao aprovar solicitação: ' + (error instanceof Error ? error.message : String(error)));
+    }
+  }
+
+  /**
+   * Atualiza status de usuário (chamado pelo AdminService)
+   */
+  async atualizarStatusUsuario(usuarioId: string, novoStatus: string): Promise<any> {
+    this.logger.log(`Atualizando status do usuário ${usuarioId} para: ${novoStatus}`);
+    
+    try {
+      const usuario = await this.usuarioRepository.findOne({
+        where: { id: usuarioId }
+      });
+
+      if (!usuario) {
+        throw new NotFoundException('Usuário não encontrado');
+      }
+
+      // Validar status permitidos
+      const statusPermitidos = ['ATIVO', 'INATIVO', 'SUSPENSO', 'BANIDO'];
+      if (!statusPermitidos.includes(novoStatus.toUpperCase())) {
+        throw new BadRequestException('Status inválido. Permitidos: ' + statusPermitidos.join(', '));
+      }
+
+      usuario.status = novoStatus.toUpperCase();
+      await this.usuarioRepository.save(usuario);
+
+      this.logger.log(`Status do usuário ${usuarioId} atualizado para: ${novoStatus}`);
+      
+      return {
+        usuarioId,
+        novoStatus: usuario.status,
+        message: 'Status do usuário atualizado com sucesso'
+      };    } catch (error) {
+      this.logger.error('Erro ao atualizar status do usuário', error);
+      throw new InternalServerErrorException('Erro ao atualizar status: ' + (error instanceof Error ? error.message : String(error)));
+    }
+  }
 }

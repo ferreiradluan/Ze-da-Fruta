@@ -232,4 +232,80 @@ export class SalesService {
     }
     return await this.pedidoRepository.findByEstabelecimento(estabelecimentoId);
   }
+  /**
+   * Cria cupom global (chamado pelo AdminService)
+   */
+  async criarCupomGlobal(dadosCupom: any): Promise<any> {
+    try {
+      // Criar cupom global usando domínio rico
+      const cupom = new Cupom();
+      cupom.codigo = dadosCupom.codigo || this.gerarCodigoCupom();
+      cupom.descricao = dadosCupom.descricao || 'Cupom Global';
+      cupom.tipoDesconto = dadosCupom.tipoDesconto || 'PERCENTUAL';
+      cupom.valor = dadosCupom.valor || 10; // 10% ou R$ 10
+      cupom.valorMinimoCompra = dadosCupom.valorMinimo || 0;
+      cupom.valorMaximoDesconto = dadosCupom.valorMaximo || null;
+      cupom.dataValidade = dadosCupom.dataValidade ? new Date(dadosCupom.dataValidade) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 dias
+      cupom.ativo = true;
+      cupom.limitesUso = dadosCupom.limitesUso || 1000; // Limite alto para cupom global
+      cupom.vezesUsado = 0;
+      // cupom.estabelecimentoId permanece undefined para cupons globais
+
+      const cupomSalvo = await this.cupomRepository.save(cupom);
+
+      return {
+        id: cupomSalvo.id,
+        codigo: cupomSalvo.codigo,
+        descricao: cupomSalvo.descricao,
+        tipoDesconto: cupomSalvo.tipoDesconto,
+        valor: cupomSalvo.valor,
+        valorMinimoCompra: cupomSalvo.valorMinimoCompra,
+        valorMaximoDesconto: cupomSalvo.valorMaximoDesconto,
+        dataValidade: cupomSalvo.dataValidade,
+        isGlobal: true,
+        message: 'Cupom global criado com sucesso'
+      };
+    } catch (error) {
+      throw new BadRequestException('Erro ao criar cupom global: ' + (error instanceof Error ? error.message : String(error)));
+    }
+  }
+
+  /**
+   * Desativa cupom (chamado pelo AdminService)
+   */
+  async desativarCupom(cupomId: string): Promise<any> {
+    try {
+      const cupom = await this.cupomRepository.findById(cupomId);
+
+      if (!cupom) {
+        throw new NotFoundException('Cupom não encontrado');
+      }
+
+      // Usar método do domínio rico para desativar
+      cupom.ativo = false;
+      
+      const cupomAtualizado = await this.cupomRepository.save(cupom);
+
+      return {
+        id: cupomAtualizado.id,
+        codigo: cupomAtualizado.codigo,
+        ativo: cupomAtualizado.ativo,
+        message: 'Cupom desativado com sucesso'
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Erro ao desativar cupom: ' + (error instanceof Error ? error.message : String(error)));
+    }
+  }
+
+  /**
+   * Gera código único para cupom
+   */
+  private gerarCodigoCupom(): string {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 8);
+    return `GLOBAL_${timestamp}_${random}`.toUpperCase();
+  }
 }

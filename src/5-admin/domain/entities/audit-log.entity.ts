@@ -1,6 +1,19 @@
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+
+@Entity('audit_logs')
 export class AuditLog {
-  id: number;
-  acao: string;
-  usuarioId: number;
-  data: Date;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column('uuid')
+  adminId!: string;
+
+  @Column()
+  acao!: string;
+
+  @Column('json')
+  detalhes: any;
+
+  @CreateDateColumn()
+  timestamp!: Date;
 }

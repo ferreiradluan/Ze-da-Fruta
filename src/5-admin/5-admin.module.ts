@@ -1,48 +1,41 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AdminController } from './api/controllers/admin.controller';
-import { AdminService } from './application/services/admin.service';
-import { SolicitacaoParceiro } from '../1-account-management/domain/entities/solicitacao-parceiro.entity';
-import { SolicitacaoParceiroRepository } from '../1-account-management/infrastructure/repositories/solicitacao-parceiro.repository';
-import { AccountService } from '../1-account-management/application/services/account.service';
-import { PaymentModule } from '../4-payment/4-payment.module';
-import { Usuario } from '../1-account-management/domain/entities/usuario.entity';
-import { Admin } from '../1-account-management/domain/entities/admin.entity';
-import { Produto } from '../2-sales/domain/entities/produto.entity';
-import { Categoria } from '../2-sales/domain/entities/categoria.entity';
-import { Estabelecimento } from '../2-sales/domain/entities/estabelecimento.entity';
-import { Pedido } from '../2-sales/domain/entities/pedido.entity';
-import { ItemPedido } from '../2-sales/domain/entities/item-pedido.entity';
-import { Cupom } from '../2-sales/domain/entities/cupom.entity';
-import { EventBusService } from '../common/event-bus';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { AdminController } from './admin.controller';
+import { AdminService } from './admin.service';
+
+// Entidades próprias do Admin
+import { AuditLog } from './domain/entities/audit-log.entity';
+import { PlatformSetting } from './domain/entities/platform-setting.entity';
+
+// Repositories próprios do Admin
+import { AuditLogRepository } from './infrastructure/repositories/audit-log.repository';
+import { PlatformSettingRepository } from './infrastructure/repositories/platform-setting.repository';
+
+// Módulos de outros domínios (para injetar services)
+import { AccountManagementModule } from '../1-account-management/1-account-management.module';
+import { SalesModule } from '../2-sales/2-sales.module';
+import { PaymentModule } from '../4-payment/payment.module';
+// import { DeliveryModule } from '../3-delivery/3-delivery.module';
 
 @Module({
   imports: [
-    PaymentModule,
     TypeOrmModule.forFeature([
-      // Entidades do Admin
-      SolicitacaoParceiro,
-      
-      // Entidades do Account Management
-      Usuario,
-      Admin,
-      
-      // Entidades do Sales
-      Produto,
-      Categoria,
-      Estabelecimento,
-      Pedido,
-      ItemPedido,
-      Cupom
-    ])
+      // Apenas entidades próprias do Admin
+      AuditLog,
+      PlatformSetting
+    ]),
+    
+    // Importar módulos para usar seus services
+    AccountManagementModule,
+    SalesModule,
+    PaymentModule,
+    // DeliveryModule
   ],
-  controllers: [AdminController],  providers: [
+  controllers: [AdminController],
+  providers: [
     AdminService,
-    SolicitacaoParceiroRepository,
-    AccountService,
-    EventBusService,
-    EventEmitter2
+    AuditLogRepository,
+    PlatformSettingRepository
   ],
   exports: [AdminService]
 })
