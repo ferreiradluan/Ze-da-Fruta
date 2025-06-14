@@ -72,3 +72,13 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Heroku
 .heroku/
+
+# Development and validation scripts (não devem ir para produção)
+/scripts/validate-payment-*.js
+/scripts/test-*.js
+/scripts/debug-*.js
+
+# Scripts específicos de desenvolvimento
+/scripts/validate-payment-complete.js
+/scripts/validate-payment-final.js
+/scripts/validate-payment-module.js

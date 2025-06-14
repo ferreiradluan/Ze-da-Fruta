@@ -46,11 +46,12 @@ export class EstoqueService {
       console.error('Erro ao reservar estoque:', error);
       
       // Emitir evento de erro na reserva
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       await this.eventBusService.emit({
         eventName: 'estoque.erro_reserva',
         payload: {
           pedidoId: event.payload.pedidoId,
-          erro: error.message
+          erro: errorMessage
         },
         timestamp: new Date(),
         aggregateId: event.payload.pedidoId

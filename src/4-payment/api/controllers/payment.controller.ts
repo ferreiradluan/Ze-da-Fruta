@@ -159,7 +159,8 @@ export class PaymentController {
       return { message: 'Webhook do Stripe processado com sucesso' };
     } catch (error) {
       console.error('Erro ao processar webhook do Stripe:', error);
-      throw new BadRequestException(error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao processar webhook';
+      throw new BadRequestException(errorMessage);
     }
   }
 
@@ -221,9 +222,12 @@ export class PaymentController {
         pedidoId: pagamento.pedidoId
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       return {
         message: 'Erro ao consultar status do pagamento',
-        error: error.message,      };
+        error: errorMessage,
+        transacaoId
+      };
     }
   }
 
@@ -278,9 +282,10 @@ export class PaymentController {
         }))
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       return {
         message: 'Erro ao consultar pagamentos do pedido',
-        error: error.message,
+        error: errorMessage,
         pedidoId
       };
     }
@@ -323,9 +328,10 @@ export class PaymentController {
       return { message: 'Webhook processado com sucesso' };
     } catch (error) {
       console.error('Erro ao processar webhook:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       return { 
         message: 'Erro ao processar webhook', 
-        error: error.message 
+        error: errorMessage 
       };
     }
   }
