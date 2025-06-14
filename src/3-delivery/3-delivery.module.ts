@@ -1,22 +1,24 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Entregador } from './domain/entities/entregador.entity';
-import { Entrega } from './domain/entities/entrega.entity';
-import { DeliveryService } from './application/services/delivery.service';
 import { DeliveryController } from './api/controllers/delivery.controller';
+import { DeliveryService } from './application/services/delivery.service';
 import { EntregaRepository } from './infrastructure/repositories/entrega.repository';
-import { EventBusModule } from '../common/event-bus';
+import { Entrega } from './domain/entities/entrega.entity';
+import { Entregador } from './domain/entities/entregador.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Entregador, Entrega]),
-    EventBusModule
+    TypeOrmModule.forFeature([Entrega, Entregador])
   ],
-  controllers: [DeliveryController],
+  controllers: [
+    DeliveryController  // ✅ APENAS 1 CONTROLLER
+  ],
   providers: [
-    DeliveryService,
+    DeliveryService,    // ✅ APENAS 1 SERVICE
     EntregaRepository
   ],
-  exports: [DeliveryService],
+  exports: [
+    DeliveryService
+  ]
 })
 export class DeliveryModule {}

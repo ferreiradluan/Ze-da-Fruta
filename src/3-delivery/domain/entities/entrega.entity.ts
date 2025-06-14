@@ -1,89 +1,105 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { StatusEntrega } from '../enums/status-entrega.enum';
-import { EnderecoVO } from '../value-objects/endereco.vo';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { StatusEntrega, StatusEntregaType, isValidStatusEntrega } from '../constants/status-entrega.constants';
+import { EnderecoVO } from '../value-objects/endereco-vo';
 
 @Entity('entregas')
 export class Entrega {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  pedidoId: string;
+  pedidoId!: string;
 
   @Column({ nullable: true })
-  entregadorId: string;
+  entregadorId!: string;
 
   @Column({
     type: 'varchar',
-    enum: StatusEntrega,
-    default: StatusEntrega.PENDENTE
+    length: 50,
+    default: StatusEntrega.AGUARDANDO_ACEITE
   })
-  status: StatusEntrega;
+  status!: StatusEntregaType;
 
-  @Column('json', { nullable: true })
-  enderecoColeta: EnderecoVO;
+  @Column('text', { nullable: true })
+  enderecoColeta!: string; // JSON string do EnderecoVO
 
-  @Column('json', { nullable: true })
-  enderecoEntrega: EnderecoVO;
-
-  @Column({ nullable: true })
-  observacoes: string;
-
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  valorFrete: number;
+  @Column('text', { nullable: true })
+  enderecoEntrega!: string; // JSON string do EnderecoVO
 
   @Column({ type: 'datetime', nullable: true })
-  previsaoEntrega: Date;
-
-  @Column({ type: 'datetime', nullable: true })
-  dataRetirada: Date;
-
-  @Column({ type: 'datetime', nullable: true })
-  dataEntrega: Date;
+  dataEstimada!: Date;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
-  // Métodos de negócio
-  confirmarRetirada(): void {
-    if (this.status !== StatusEntrega.PENDENTE) {
-      throw new Error('Apenas entregas pendentes podem ser retiradas');
+  // ✅ MÉTODOS DO DIAGRAMA (Domínio Rico)
+  aceitar(entregadorId: string): void {
+    if (this.status !== StatusEntrega.AGUARDANDO_ACEITE) {
+      throw new Error('Entrega não está disponível para aceite');
     }
-    this.status = StatusEntrega.EM_ROTA;
-    this.dataRetirada = new Date();
+    this.entregadorId = entregadorId;
+    this.status = StatusEntrega.ACEITA;
   }
 
-  confirmarEntrega(): void {
-    if (this.status !== StatusEntrega.EM_ROTA) {
-      throw new Error('Apenas entregas em rota podem ser entregues');
+  marcarComoColetado(): void {
+    if (this.status !== StatusEntrega.A_CAMINHO_DA_LOJA) {
+      throw new Error('Entregador deve estar a caminho da loja');
+    }
+    this.status = StatusEntrega.COLETADO;
+  }
+
+  marcarComoEntregue(): void {
+    if (this.status !== StatusEntrega.EM_TRANSPORTE) {
+      throw new Error('Entrega deve estar em transporte');
     }
     this.status = StatusEntrega.ENTREGUE;
-    this.dataEntrega = new Date();
   }
 
-  cancelar(): void {
+  cancelar(motivo?: string): void {
     if (this.status === StatusEntrega.ENTREGUE) {
-      throw new Error('Não é possível cancelar uma entrega já realizada');
+      throw new Error('Não é possível cancelar entrega já realizada');
     }
     this.status = StatusEntrega.CANCELADA;
   }
 
-  static criar(
-    pedidoId: string,
-    enderecoColeta: EnderecoVO,
-    enderecoEntrega: EnderecoVO,
-    valorFrete?: number
-  ): Entrega {
-    const entrega = new Entrega();
-    entrega.pedidoId = pedidoId;
-    entrega.enderecoColeta = enderecoColeta;
-    entrega.enderecoEntrega = enderecoEntrega;
-    entrega.valorFrete = valorFrete || 0;
-    entrega.status = StatusEntrega.PENDENTE;
-    entrega.previsaoEntrega = new Date(Date.now() + 60 * 60 * 1000); // 1 hora a partir de agora
-    return entrega;
+  // Métodos para trabalhar com EnderecoVO
+  getEnderecoColeta(): EnderecoVO | null {
+    if (!this.enderecoColeta) return null;
+    const data = JSON.parse(this.enderecoColeta);
+    return new EnderecoVO(data.rua, data.numero, data.cidade, data.cep);
+  }
+
+  setEnderecoColeta(endereco: EnderecoVO): void {
+    this.enderecoColeta = JSON.stringify({
+      rua: endereco.rua,
+      numero: endereco.numero,
+      cidade: endereco.cidade,
+      cep: endereco.cep
+    });
+  }
+
+  getEnderecoEntrega(): EnderecoVO | null {
+    if (!this.enderecoEntrega) return null;
+    const data = JSON.parse(this.enderecoEntrega);
+    return new EnderecoVO(data.rua, data.numero, data.cidade, data.cep);
+  }
+
+  setEnderecoEntrega(endereco: EnderecoVO): void {
+    this.enderecoEntrega = JSON.stringify({
+      rua: endereco.rua,
+      numero: endereco.numero,
+      cidade: endereco.cidade,
+      cep: endereco.cep
+    });
+  }
+
+  // Validação de status
+  private validarStatus(novoStatus: StatusEntregaType): void {
+    if (!isValidStatusEntrega(novoStatus)) {
+      throw new Error(`Status inválido: ${novoStatus}`);
+    }
   }
 }

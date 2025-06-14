@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Produto } from '../../domain/entities/produto.entity';
 import { Pedido } from '../../domain/entities/pedido.entity';
 import { Cupom } from '../../domain/entities/cupom.entity';
@@ -30,6 +31,7 @@ export class SalesService {
     private readonly estabelecimentoRepository: EstabelecimentoRepository,
     private readonly cupomRepository: CupomRepository,
     private readonly categoriaRepository: CategoriaRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -147,6 +149,36 @@ export class SalesService {
     pedido.aplicarCupom(cupom);
 
     return await this.pedidoRepository.save(pedido);
+  }
+
+  /**
+   * Confirma um pedido e emite evento para criar entrega
+   * Método para integração com o sistema de entregas via eventos
+   */
+  async confirmarPedido(pedidoId: string, enderecoEntrega: any): Promise<Pedido> {
+    const pedido = await this.pedidoRepository.findById(pedidoId);
+    
+    if (!pedido) {
+      throw new NotFoundException('Pedido não encontrado');
+    }
+
+    // Atualizar status do pedido para confirmado/pago
+    pedido.status = StatusPedido.PAGO;
+    const pedidoConfirmado = await this.pedidoRepository.save(pedido);
+
+    // ✅ EMITIR EVENTO PARA CRIAR ENTREGA
+    await this.eventEmitter.emitAsync('pedido.confirmado', {
+      pedidoId: pedido.id,
+      enderecoEntrega: enderecoEntrega,
+      enderecoColeta: {
+        rua: 'Rua do Estabelecimento', 
+        numero: '123',
+        cidade: 'São Paulo',
+        cep: '01234-567'
+      }
+    });
+
+    return pedidoConfirmado;
   }
 
   // ===== MÉTODOS MIGRADOS DOS SERVICES EXTRAS =====

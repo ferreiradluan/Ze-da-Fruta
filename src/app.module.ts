@@ -2,6 +2,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { CommonModule } from './common/common.module';
@@ -16,6 +17,10 @@ import { SecurityConfig, getSecurityConfig } from './common/config/security.conf
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    EventEmitterModule.forRoot({
+      // Use this instance across the whole app
+      global: true,
     }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
