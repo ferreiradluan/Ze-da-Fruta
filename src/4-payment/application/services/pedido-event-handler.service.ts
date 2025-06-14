@@ -44,9 +44,9 @@ export class PedidoEventHandler {
         try {
           const pedidoAtualizado = await this.pedidoRepository.findOne({ where: { id: evento.pedidoId } });
           if (pedidoAtualizado && pedidoAtualizado.status === StatusPedido.PAGO) {
-            pedidoAtualizado.status = StatusPedido.EM_PREPARO;
+            pedidoAtualizado.status = StatusPedido.EM_PREPARACAO;
             await this.pedidoRepository.save(pedidoAtualizado);
-            console.log(`Pedido ${evento.pedidoId} movido para EM_PREPARO`);
+            console.log(`Pedido ${evento.pedidoId} movido para EM_PREPARACAO`);
           }
         } catch (error) {
           console.error(`Erro ao mover pedido ${evento.pedidoId} para EM_PREPARO:`, error);
@@ -113,7 +113,7 @@ export class PedidoEventHandler {
       }
 
       // Liberar estoque se necessário
-      if ([StatusPedido.PAGO, StatusPedido.EM_PREPARO, StatusPedido.ENVIADO].includes(pedido.status)) {
+      if ([StatusPedido.PAGO, StatusPedido.EM_PREPARACAO, StatusPedido.AGUARDANDO_ENTREGADOR].includes(pedido.status)) {
         await this.estoqueService.liberarEstoque(evento.pedidoId);
       }
 

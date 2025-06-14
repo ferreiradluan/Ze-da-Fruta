@@ -16,12 +16,13 @@ import { RolesGuard } from '../../../1-account-management/application/strategies
 import { Roles } from '../../../1-account-management/application/strategies/guards/roles.decorator';
 import { RoleType } from '../../../1-account-management/domain/enums/role-type.enum';
 import { SalesService } from '../../application/services/sales.service';
+import { CategoriaService } from '../../application/services/categoria.service';
 import { CreateCategoriaDto } from '../dto/create-categoria.dto';
 
 @ApiTags('👑 Admin - Categorias')
 @Controller('categorias')
 export class CategoriasController {
-  constructor(private readonly salesService: SalesService) {}
+  constructor(private readonly categoriaService: CategoriaService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -54,7 +55,7 @@ export class CategoriasController {
     description: 'Acesso negado - apenas administradores'
   })
   async listarCategorias() {
-    return this.salesService.listarCategorias();
+    return this.categoriaService.listarCategorias();
   }
 
   @Post()
@@ -89,7 +90,7 @@ export class CategoriasController {
     description: 'Acesso negado - apenas administradores'
   })
   async criarCategoria(@Req() req, @Body(ValidationPipe) createCategoriaDto: CreateCategoriaDto) {
-    return this.salesService.criarCategoria(req.user, createCategoriaDto);
+    return this.categoriaService.criarCategoria(req.user, createCategoriaDto);
   }
 
   @Put(':id')
@@ -132,7 +133,7 @@ export class CategoriasController {
     @Param('id') id: string, 
     @Body(ValidationPipe) updateData: Partial<CreateCategoriaDto>
   ) {
-    return this.salesService.atualizarCategoria(req.user, id, updateData);
+    return this.categoriaService.atualizarCategoria(req.user, id, updateData);
   }
 
   @Delete(':id')
@@ -171,7 +172,7 @@ export class CategoriasController {
     description: 'Categoria não pode ser excluída - possui produtos associados'
   })
   async excluirCategoria(@Req() req, @Param('id') id: string) {
-    await this.salesService.excluirCategoria(req.user, id);
+    await this.categoriaService.excluirCategoria(req.user, id);
     return { message: 'Categoria excluída com sucesso' };
   }
 }

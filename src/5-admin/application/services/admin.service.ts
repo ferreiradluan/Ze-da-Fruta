@@ -1,13 +1,16 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { SolicitacaoParceiro } from '../../../1-account-management/domain/entities/solicitacao-parceiro.entity';
 import { SolicitacaoParceiroRepository } from '../../../1-account-management/infrastructure/repositories/solicitacao-parceiro.repository';
 import { StatusSolicitacao } from '../../../1-account-management/domain/enums/status-solicitacao.enum';
 import { TipoSolicitacao } from '../../../1-account-management/domain/enums/tipo-solicitacao.enum';
 import { AccountService } from '../../../1-account-management/application/services/account.service';
-import { SalesService } from '../../../2-sales/application/services/sales.service';
 import { PaymentService } from '../../../4-payment/application/services/payment.service';
 import { StatusPedido } from '../../../2-sales/domain/enums/status-pedido.enum';
 import { StatusUsuario } from '../../../1-account-management/domain/entities/usuario.entity';
+import { Pedido } from '../../../2-sales/domain/entities/pedido.entity';
+import { Estabelecimento } from '../../../2-sales/domain/entities/estabelecimento.entity';
 
 export interface ListarSolicitacoesFilters {
   status?: StatusSolicitacao;
@@ -81,8 +84,11 @@ export class AdminService {
   constructor(
     private readonly solicitacaoRepository: SolicitacaoParceiroRepository,
     private readonly accountService: AccountService,
-    private readonly salesService: SalesService,
     private readonly paymentService: PaymentService,
+    @InjectRepository(Pedido)
+    private readonly pedidoRepository: Repository<Pedido>,
+    @InjectRepository(Estabelecimento)
+    private readonly estabelecimentoRepository: Repository<Estabelecimento>,
   ) {}
 
   /**
@@ -149,10 +155,21 @@ export class AdminService {
       this.logger.log(`Criando usuário parceiro para solicitação ${solicitacaoId}`);
       usuarioId = await this.accountService.criarUsuarioParceiro(solicitacao);
 
-      // 3. Se for loja, criar estabelecimento via SalesService
+      // 3. Se for loja, criar estabelecimento diretamente
       if (solicitacao.tipo === TipoSolicitacao.LOJISTA) {
         this.logger.log(`Criando estabelecimento para solicitação ${solicitacaoId}`);
-        estabelecimentoId = await this.salesService.criarEstabelecimento(solicitacao, usuarioId);
+        
+        const estabelecimento = new Estabelecimento();
+        estabelecimento.nome = solicitacao.nomeEstabelecimento || 'Estabelecimento';
+        estabelecimento.cnpj = solicitacao.cnpj || '';
+        estabelecimento.endereco = solicitacao.endereco || '';
+        estabelecimento.telefone = solicitacao.telefone || '';
+        estabelecimento.email = solicitacao.email;
+        estabelecimento.usuarioId = usuarioId!;
+        estabelecimento.ativo = true;
+        
+        const estabelecimentoSalvo = await this.estabelecimentoRepository.save(estabelecimento);
+        estabelecimentoId = estabelecimentoSalvo.id;
       }
 
       // 4. Aprovar solicitação
@@ -357,25 +374,33 @@ export class AdminService {
   async iniciarReembolso(pedidoId: string, motivo: string): Promise<IniciarReembolsoResponse> {
     this.logger.log(`Iniciando reembolso para o pedido ${pedidoId}`);
 
-    // 1. Buscar e validar pedido
-    const pedido = await this.salesService.buscarPedidoPorId(pedidoId);
+    // 1. Buscar e validar pedido diretamente do repositório
+    const pedido = await this.pedidoRepository.findOne({
+      where: { id: pedidoId },
+      relations: ['itens', 'cliente']
+    });
 
     if (!pedido) {
       throw new NotFoundException('Pedido não encontrado');
     }
 
     // 2. Validar se pedido pode ser reembolsado
-    const validacao = this.salesService.validarReembolsoPedido(pedido);
-    if (!validacao.podeReembolsar) {
-      throw new BadRequestException(validacao.motivo || 'Pedido não pode ser reembolsado');
+    const statusValidos = [
+      StatusPedido.PAGAMENTO_PENDENTE,
+      StatusPedido.PAGO,
+      StatusPedido.EM_PREPARACAO
+    ];
+    
+    if (!statusValidos.includes(pedido.status)) {
+      throw new BadRequestException('Pedido não pode ser reembolsado no status atual');
     }
 
     // 3. Criar solicitação de reembolso
     await this.paymentService.iniciarReembolso(pedidoId, pedido.valorTotal);
 
-    // 4. Atualizar status do pedido
-    pedido.status = StatusPedido.REEMBOLSO_SOLICITADO;
-    await this.salesService.atualizarPedido(pedido);
+    // 4. Atualizar status do pedido diretamente
+    pedido.status = StatusPedido.CANCELADO;
+    await this.pedidoRepository.save(pedido);
 
     // 5. Gerar ID temporário para o reembolso (seria obtido do PaymentService em implementação completa)
     const reembolsoId = `reemb_${pedidoId}_${Date.now()}`;

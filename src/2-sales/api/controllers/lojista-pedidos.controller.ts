@@ -5,6 +5,7 @@ import { RolesGuard } from '../../../1-account-management/application/strategies
 import { Roles } from '../../../1-account-management/application/strategies/guards/roles.decorator';
 import { RoleType } from '../../../1-account-management/domain/enums/role-type.enum';
 import { SalesService } from '../../application/services/sales.service';
+import { LojistaPedidoService } from '../../application/services/lojista-pedido.service';
 import { StatusPedido } from '../../domain/enums/status-pedido.enum';
 
 @ApiTags('🏪 Lojista - Pedidos')
@@ -13,7 +14,7 @@ import { StatusPedido } from '../../domain/enums/status-pedido.enum';
 @Roles(RoleType.PARTNER)
 @ApiBearerAuth('JWT-auth')
 export class LojistaPedidosController {
-  constructor(private readonly salesService: SalesService) {}
+  constructor(private readonly lojistaPedidoService: LojistaPedidoService) {}
 
   @Get()
   @ApiOperation({
@@ -67,7 +68,7 @@ export class LojistaPedidosController {
   })
   async listarPedidosDaLoja(@Req() req, @Query('status') status?: StatusPedido) {
     const lojistaId = req.user.id;
-    return this.salesService.listarPedidosDaLoja(lojistaId, status);
+    return this.lojistaPedidoService.listarPedidosDaLoja(lojistaId, status);
   }
 
   @Patch(':id/status')
@@ -126,6 +127,6 @@ export class LojistaPedidosController {
     @Body() body: { status: StatusPedido }
   ) {
     const lojistaId = req.user.id;
-    return this.salesService.atualizarStatusPedidoLojista(lojistaId, pedidoId, body.status);
+    return this.lojistaPedidoService.atualizarStatusPedidoLojista(lojistaId, pedidoId, body.status);
   }
 }

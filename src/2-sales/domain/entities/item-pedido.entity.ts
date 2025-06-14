@@ -2,6 +2,7 @@ import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../../common/core/base.entity';
 import { Pedido } from './pedido.entity';
 import { Produto } from './produto.entity';
+import { Dinheiro } from '../value-objects/dinheiro.vo';
 
 @Entity('itens_pedido')
 export class ItemPedido extends BaseEntity {
@@ -37,8 +38,23 @@ export class ItemPedido extends BaseEntity {
   imagemProduto: string;
 
   // Métodos de Negócio
-  calcularSubtotal(): void {
+  calcularSubtotal(): Dinheiro {
+    const valor = this.quantidade * this.precoUnitario;
+    this.subtotal = valor;
+    return Dinheiro.criar(valor);
+  }
+
+  // Método interno para calcular subtotal sem retornar Value Object (para compatibilidade)
+  private calcularSubtotalInterno(): void {
     this.subtotal = this.quantidade * this.precoUnitario;
+  }
+
+  getPrecoUnitario(): Dinheiro {
+    return Dinheiro.criar(this.precoUnitario);
+  }
+
+  getSubtotal(): Dinheiro {
+    return Dinheiro.criar(this.subtotal);
   }
 
   static criar(produto: Produto, quantidade: number): ItemPedido {
@@ -49,7 +65,7 @@ export class ItemPedido extends BaseEntity {
     item.precoUnitario = produto.preco;
     item.nomeProduto = produto.nome;
     item.imagemProduto = produto.imagemUrl;
-    item.calcularSubtotal();
+    item.calcularSubtotalInterno();
     return item;
   }
 
@@ -58,6 +74,6 @@ export class ItemPedido extends BaseEntity {
       throw new Error('Quantidade deve ser maior que zero');
     }
     this.quantidade = novaQuantidade;
-    this.calcularSubtotal();
+    this.calcularSubtotalInterno();
   }
 }

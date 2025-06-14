@@ -5,7 +5,6 @@ import { AdminService } from './application/services/admin.service';
 import { SolicitacaoParceiro } from '../1-account-management/domain/entities/solicitacao-parceiro.entity';
 import { SolicitacaoParceiroRepository } from '../1-account-management/infrastructure/repositories/solicitacao-parceiro.repository';
 import { AccountService } from '../1-account-management/application/services/account.service';
-import { SalesService } from '../2-sales/application/services/sales.service';
 import { PaymentModule } from '../4-payment/4-payment.module';
 import { Usuario } from '../1-account-management/domain/entities/usuario.entity';
 import { Admin } from '../1-account-management/domain/entities/admin.entity';
@@ -42,7 +41,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
     AdminService,
     SolicitacaoParceiroRepository,
     AccountService,
-    SalesService,
     EventBusService,
     EventEmitter2
   ],
