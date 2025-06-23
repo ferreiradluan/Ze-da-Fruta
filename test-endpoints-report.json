@@ -1,0 +1,231 @@
+{
+  "timestamp": "2025-06-23T02:01:27.275Z",
+  "summary": {
+    "working": 0,
+    "broken": 14,
+    "total": 14
+  },
+  "workingEndpoints": [],
+  "brokenEndpoints": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Health check do sistema",
+      "working": false
+    },
+    {
+      "endpoint": "/sales/categorias",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Listar categorias",
+      "working": false
+    },
+    {
+      "endpoint": "/sales/produtos",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Listar produtos disponíveis",
+      "working": false
+    },
+    {
+      "endpoint": "/sales/estabelecimentos",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Listar estabelecimentos",
+      "working": false
+    },
+    {
+      "endpoint": "/admin/dashboard",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Dashboard administrativo",
+      "working": false
+    },
+    {
+      "endpoint": "/admin/usuarios",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Listar todos os usuários",
+      "working": false
+    },
+    {
+      "endpoint": "/admin/usuarios/pendentes",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Listar usuários pendentes",
+      "working": false
+    },
+    {
+      "endpoint": "/admin/products",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Listar todos os produtos (admin)",
+      "working": false
+    },
+    {
+      "endpoint": "/admin/estabelecimentos",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Listar estabelecimentos (admin)",
+      "working": false
+    },
+    {
+      "endpoint": "/admin/estabelecimentos",
+      "method": "POST",
+      "status": "NETWORK_ERROR",
+      "description": "Criar estabelecimento via API",
+      "working": false
+    },
+    {
+      "endpoint": "/admin/products",
+      "method": "POST",
+      "status": "NETWORK_ERROR",
+      "description": "Criar produto: Maçã Gala",
+      "working": false
+    },
+    {
+      "endpoint": "/admin/products",
+      "method": "POST",
+      "status": "NETWORK_ERROR",
+      "description": "Criar produto: Banana Prata",
+      "working": false
+    },
+    {
+      "endpoint": "/sales/produtos",
+      "method": "GET",
+      "status": "NETWORK_ERROR",
+      "description": "Listar produtos após população",
+      "working": false
+    },
+    {
+      "endpoint": "/auth/google/simulate",
+      "method": "POST",
+      "status": "NETWORK_ERROR",
+      "description": "Simulação de login Google",
+      "working": false
+    }
+  ],
+  "allResults": [
+    {
+      "type": "test",
+      "message": "Tentando fazer login como admin...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:26.411Z"
+    },
+    {
+      "type": "test",
+      "message": "Verificando se o servidor está rodando...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:26.484Z"
+    },
+    {
+      "type": "success",
+      "message": "Servidor está rodando!",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.170Z"
+    },
+    {
+      "type": "test",
+      "message": "Tentando fazer login como admin...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.170Z"
+    },
+    {
+      "type": "success",
+      "message": "Login admin realizado com sucesso!",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.252Z"
+    },
+    {
+      "type": "warning",
+      "message": "Health check do sistema: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.256Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar categorias: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.257Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar produtos disponíveis: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.258Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar estabelecimentos: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.259Z"
+    },
+    {
+      "type": "warning",
+      "message": "Dashboard administrativo: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.260Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar todos os usuários: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.261Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar usuários pendentes: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.262Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar todos os produtos (admin): Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.264Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar estabelecimentos (admin): Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.265Z"
+    },
+    {
+      "type": "info",
+      "message": "Criando estabelecimento via endpoint...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.266Z"
+    },
+    {
+      "type": "warning",
+      "message": "Falha ao criar estabelecimento",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.267Z"
+    },
+    {
+      "type": "info",
+      "message": "Criando produtos via endpoint...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.267Z"
+    },
+    {
+      "type": "warning",
+      "message": "Falha ao criar produto Maçã Gala",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.268Z"
+    },
+    {
+      "type": "warning",
+      "message": "Falha ao criar produto Banana Prata",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.268Z"
+    },
+    {
+      "type": "error",
+      "message": "Falha ao listar produtos",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.270Z"
+    }
+  ]
+}

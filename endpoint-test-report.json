@@ -1,0 +1,479 @@
+{
+  "timestamp": "2025-06-23T02:01:30.683Z",
+  "totalTests": 63,
+  "results": [
+    {
+      "type": "test",
+      "message": "Tentando fazer login como admin...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:26.411Z"
+    },
+    {
+      "type": "test",
+      "message": "Verificando se o servidor está rodando...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:26.484Z"
+    },
+    {
+      "type": "success",
+      "message": "Servidor está rodando!",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.170Z"
+    },
+    {
+      "type": "test",
+      "message": "Tentando fazer login como admin...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.170Z"
+    },
+    {
+      "type": "success",
+      "message": "Login admin realizado com sucesso!",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.252Z"
+    },
+    {
+      "type": "warning",
+      "message": "Health check do sistema: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.256Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar categorias: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.257Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar produtos disponíveis: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.258Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar estabelecimentos: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.259Z"
+    },
+    {
+      "type": "warning",
+      "message": "Dashboard administrativo: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.260Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar todos os usuários: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.261Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar usuários pendentes: Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.262Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar todos os produtos (admin): Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.264Z"
+    },
+    {
+      "type": "warning",
+      "message": "Listar estabelecimentos (admin): Erro",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.265Z"
+    },
+    {
+      "type": "info",
+      "message": "Criando estabelecimento via endpoint...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.266Z"
+    },
+    {
+      "type": "warning",
+      "message": "Falha ao criar estabelecimento",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.267Z"
+    },
+    {
+      "type": "info",
+      "message": "Criando produtos via endpoint...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.267Z"
+    },
+    {
+      "type": "warning",
+      "message": "Falha ao criar produto Maçã Gala",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.268Z"
+    },
+    {
+      "type": "warning",
+      "message": "Falha ao criar produto Banana Prata",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.268Z"
+    },
+    {
+      "type": "error",
+      "message": "Falha ao listar produtos",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.270Z"
+    },
+    {
+      "type": "success",
+      "message": "Relatório salvo em: C:\\Users\\henri\\Videos\\ze-da-fruta-backend\\test-endpoints-report.json",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.276Z"
+    },
+    {
+      "type": "success",
+      "message": "Seed de teste concluída com sucesso!",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.277Z"
+    },
+    {
+      "type": "success",
+      "message": "Login admin realizado com sucesso!",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.411Z"
+    },
+    {
+      "type": "test",
+      "message": "🛍️ Testando endpoints de produtos...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.411Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /products (público)...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.411Z"
+    },
+    {
+      "type": "success",
+      "message": "Produtos listados: 0 encontrados",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.574Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /products/available...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.574Z"
+    },
+    {
+      "type": "success",
+      "message": "Produtos disponíveis: 0 encontrados",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.739Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /admin/products...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.739Z"
+    },
+    {
+      "type": "success",
+      "message": "Admin - Produtos listados: 0 encontrados",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.907Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando POST /admin/products...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:27.907Z"
+    },
+    {
+      "type": "success",
+      "message": "Produto criado via admin com sucesso!",
+      "data": {
+        "message": "Criação de produto administrativo em desenvolvimento",
+        "dados": {
+          "nome": "Produto Teste Admin",
+          "descricao": "Produto criado via endpoint admin",
+          "preco": 15.99,
+          "categoriaId": "cat-001",
+          "estabelecimentoId": "estab-001",
+          "estoque": 50,
+          "unidade": "un",
+          "ativo": true
+        }
+      },
+      "timestamp": "2025-06-23T02:01:28.070Z"
+    },
+    {
+      "type": "test",
+      "message": "👥 Testando endpoints de usuários...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:28.071Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /admin/usuarios...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:28.071Z"
+    },
+    {
+      "type": "success",
+      "message": "Usuários listados: 0 encontrados",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:28.232Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /admin/usuarios/pendentes...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:28.232Z"
+    },
+    {
+      "type": "success",
+      "message": "Usuários pendentes: 0 encontrados",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:28.394Z"
+    },
+    {
+      "type": "test",
+      "message": "🏪 Testando endpoints de estabelecimentos...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:28.394Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /admin/estabelecimentos...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:28.394Z"
+    },
+    {
+      "type": "success",
+      "message": "Estabelecimentos listados: 0 encontrados",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:28.554Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando POST /admin/estabelecimentos...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:28.554Z"
+    },
+    {
+      "type": "success",
+      "message": "Estabelecimento criado via admin!",
+      "data": {
+        "id": "c112fb5b-3801-490c-9d48-c8f41a6d3e1e",
+        "createdAt": "2025-06-23T02:01:26.000Z",
+        "updatedAt": "2025-06-23T02:01:26.000Z",
+        "nome": "Estabelecimento Teste Admin",
+        "cnpj": "12345678000199",
+        "endereco": "Rua Teste, 123 - São Paulo/SP",
+        "telefone": "(11) 99999-9999",
+        "email": "teste@estabelecimento.com",
+        "usuarioId": null,
+        "ativo": true,
+        "estaAberto": true,
+        "descricao": null,
+        "imagemUrl": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "timestamp": "2025-06-23T02:01:29.064Z"
+    },
+    {
+      "type": "test",
+      "message": "🛒 Testando endpoints de carrinho...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:29.064Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /cart...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:29.065Z"
+    },
+    {
+      "type": "success",
+      "message": "Carrinho obtido com sucesso!",
+      "data": {
+        "itens": [],
+        "valorTotal": 0,
+        "quantidadeItens": 0,
+        "message": "Carrinho vazio - adicione produtos para começar!"
+      },
+      "timestamp": "2025-06-23T02:01:29.222Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando POST /cart/items...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:29.378Z"
+    },
+    {
+      "type": "error",
+      "message": "ENDPOINT QUEBRADO: POST /cart/items",
+      "data": {
+        "statusCode": 404,
+        "timestamp": "2025-06-23T02:01:27.756Z",
+        "path": "/cart/items",
+        "error": {
+          "message": "Produto não encontrado",
+          "error": "Not Found",
+          "statusCode": 404
+        }
+      },
+      "timestamp": "2025-06-23T02:01:29.553Z"
+    },
+    {
+      "type": "test",
+      "message": "📦 Testando endpoints de pedidos...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:29.554Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /pedidos...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:29.554Z"
+    },
+    {
+      "type": "success",
+      "message": "Pedidos listados: 0 encontrados",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:29.710Z"
+    },
+    {
+      "type": "test",
+      "message": "Buscando produto real para teste de pedido...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:29.710Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando POST /pedidos...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:29.870Z"
+    },
+    {
+      "type": "error",
+      "message": "ENDPOINT QUEBRADO: POST /pedidos",
+      "data": {
+        "statusCode": 400,
+        "timestamp": "2025-06-23T02:01:28.261Z",
+        "path": "/pedidos",
+        "error": {
+          "message": "Produto prod-001 nao encontrado",
+          "error": "Bad Request",
+          "statusCode": 400
+        }
+      },
+      "timestamp": "2025-06-23T02:01:30.045Z"
+    },
+    {
+      "type": "test",
+      "message": "👤 Testando endpoints de perfil...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:30.045Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /profile/me...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:30.045Z"
+    },
+    {
+      "type": "success",
+      "message": "Perfil obtido com sucesso!",
+      "data": {
+        "id": "1aada7af-1dc3-40b0-ab99-4d86e471e28e",
+        "email": "zedafruta@admin.com",
+        "nome": "Usuário de Teste",
+        "telefone": "(11) 99999-9999",
+        "status": "ATIVO",
+        "roles": [
+          "ADMIN"
+        ],
+        "createdAt": "2025-06-23T02:01:28.419Z",
+        "updatedAt": "2025-06-23T02:01:28.419Z"
+      },
+      "timestamp": "2025-06-23T02:01:30.203Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando PUT /profile/me...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:30.204Z"
+    },
+    {
+      "type": "success",
+      "message": "Perfil atualizado com sucesso!",
+      "data": {
+        "message": "Perfil atualizado com sucesso",
+        "dadosAtualizados": {
+          "nome": "Admin Teste Atualizado",
+          "telefone": "(11) 88888-8888",
+          "updatedAt": "2025-06-23T02:01:28.584Z"
+        },
+        "userId": "1aada7af-1dc3-40b0-ab99-4d86e471e28e"
+      },
+      "timestamp": "2025-06-23T02:01:30.367Z"
+    },
+    {
+      "type": "test",
+      "message": "🤝 Testando endpoints de parceiros...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:30.368Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /partner/dashboard...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:30.368Z"
+    },
+    {
+      "type": "success",
+      "message": "Dashboard do parceiro acessado!",
+      "data": {
+        "message": "Dashboard do parceiro acessível",
+        "parceiroId": "1aada7af-1dc3-40b0-ab99-4d86e471e28e",
+        "email": "zedafruta@admin.com",
+        "endpoints": [
+          "/partner/dashboard/resumo",
+          "/partner/dashboard/pedidos-recentes"
+        ]
+      },
+      "timestamp": "2025-06-23T02:01:30.527Z"
+    },
+    {
+      "type": "test",
+      "message": "Testando GET /partner/dashboard/resumo...",
+      "data": null,
+      "timestamp": "2025-06-23T02:01:30.527Z"
+    },
+    {
+      "type": "success",
+      "message": "Resumo do dashboard obtido!",
+      "data": {
+        "pedidos": {
+          "total": 0,
+          "pendentes": 0,
+          "emAndamento": 0,
+          "concluidos": 0
+        },
+        "vendas": {
+          "hoje": 0,
+          "semana": 0,
+          "mes": 0
+        },
+        "produtos": {
+          "total": 0,
+          "ativos": 0,
+          "inativos": 0
+        }
+      },
+      "timestamp": "2025-06-23T02:01:30.683Z"
+    }
+  ]
+}

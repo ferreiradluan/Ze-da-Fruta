@@ -1,0 +1,11 @@
+export const STATUS_SOLICITACAO = {
+  PENDENTE: 'PENDENTE',
+  EM_ANALISE: 'EM_ANALISE',
+  APROVADA: 'APROVADA',
+  REJEITADA: 'REJEITADA',
+  CANCELADA: 'CANCELADA'
+} as const;
+
+export type StatusSolicitacao = typeof STATUS_SOLICITACAO[keyof typeof STATUS_SOLICITACAO];
+
+export const STATUS_SOLICITACAO_ARRAY = Object.values(STATUS_SOLICITACAO);
